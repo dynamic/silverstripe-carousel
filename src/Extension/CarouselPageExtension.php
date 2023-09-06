@@ -60,4 +60,14 @@ class CarouselPageExtension extends DataExtension
 
         $fields->addFieldToTab('Root.Slides', $grid);
     }
+
+    /**
+     * Disable rewrite hash links for this page type
+     *
+     * @return void
+     */
+    public function contentcontrollerInit()
+    {
+        SSViewer::setRewriteHashLinksDefault(false);
+    }
 }
