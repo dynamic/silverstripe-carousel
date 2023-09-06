@@ -11,7 +11,7 @@ class VideoSlideTest extends SapphireTest
     /**
      * @var string
      */
-    protected static $fixture_file = 'slide-test.yml';
+    protected static $fixture_file = 'video-slide-test.yml';
 
     /**
      * Tests getCMSFields().
