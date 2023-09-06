@@ -18,7 +18,6 @@ use SilverStripe\Versioned\Versioned;
  * @property bool $ShowTitle
  * @property string $Content
  * @property string $ParentClass
- * @property int $Sort
  * @property int $ParentID
  * @method DataObject Parent()
  * @mixin Versioned
@@ -48,7 +47,6 @@ class Slide extends DataObject
         'ShowTitle' => 'Boolean',
         'Content' => 'HTMLText',
         'ParentClass' => 'Varchar',
-        'Sort' => 'Int',
     ];
 
     /**
@@ -63,13 +61,6 @@ class Slide extends DataObject
      */
     private static $extensions = [
         Versioned::class,
-    ];
-
-    /**
-     * @var true[]
-     */
-    private static $indexes = [
-        'Sort' => true,
     ];
 
     /**
@@ -91,11 +82,6 @@ class Slide extends DataObject
     ];
 
     /**
-     * @var string
-     */
-    private static $default_sort = 'Sort';
-
-    /**
      * @return FieldList
      */
     public function getCMSFields(): FieldList
@@ -103,6 +89,7 @@ class Slide extends DataObject
         $this->beforeUpdateCMSFields(function (FieldList $fields) {
             $fields->removeByName([
                 'ShowTitle',
+                'ParentClass',
             ]);
 
             $fields->replaceField(
