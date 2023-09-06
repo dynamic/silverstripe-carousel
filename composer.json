@@ -19,7 +19,7 @@
     "autoload": {
         "psr-4": {
             "Dynamic\\Carousel\\": "src/",
-            "Dynamic\\Carousel\\Test\\": "tests/php/"
+            "Dynamic\\Carousel\\Test\\": "tests/"
         }
     }
 }
