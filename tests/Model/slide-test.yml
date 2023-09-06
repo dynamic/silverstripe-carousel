@@ -1,0 +1,4 @@
+Dynamic\Carousel\Model\Slide:
+  one:
+    Title: 'Slide 1'
+    Content: 'Slide 1 Content'
