@@ -4,6 +4,12 @@ namespace Dynamic\Carousel\Model;
 
 use SilverStripe\Assets\Image;
 
+/**
+ * Class \Dynamic\Carousel\Model\ImageSlide
+ *
+ * @property int $ImageID
+ * @method Image Image()
+ */
 class ImageSlide extends Slide
 {
     /**
@@ -34,4 +40,6 @@ class ImageSlide extends Slide
     private static $owns = [
         'Image',
     ];
+
+    private static $hide_ancestor = Slide::class;
 }

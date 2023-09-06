@@ -10,6 +10,19 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Versioned\Versioned;
 
+/**
+ * Class \Dynamic\Carousel\Model\Slide
+ *
+ * @property int $Version
+ * @property string $Title
+ * @property bool $ShowTitle
+ * @property string $Content
+ * @property string $ParentClass
+ * @property int $Sort
+ * @property int $ParentID
+ * @method DataObject Parent()
+ * @mixin Versioned
+ */
 class Slide extends DataObject
 {
     /**

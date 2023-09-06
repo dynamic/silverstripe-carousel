@@ -5,6 +5,13 @@ namespace Dynamic\Carousel\Model;
 use SilverStripe\Assets\File;
 use SilverStripe\Forms\FieldList;
 
+/**
+ * Class \Dynamic\Carousel\Model\VideoSlide
+ *
+ * @property string $VideoType
+ * @property int $VideoID
+ * @method File Video()
+ */
 class VideoSlide extends Slide
 {
     /**
