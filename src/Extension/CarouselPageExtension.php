@@ -11,6 +11,7 @@ use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 use Symbiote\GridFieldExtensions\GridFieldAddNewMultiClass;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
+use SilverStripe\Forms\GridField\GridFieldFilterHeader;
 use Symbiote\GridFieldExtensions\GridFieldAddExistingSearchButton;
 
 /**
@@ -53,6 +54,7 @@ class CarouselPageExtension extends DataExtension
             ->removeComponentsByType([
                 GridFieldAddNewButton::class,
                 GridFieldAddExistingAutocompleter::class,
+                GridFieldFilterHeader::class,
             ])
             ->addComponents([
                 $multiClass = GridFieldAddNewMultiClass::create(),
