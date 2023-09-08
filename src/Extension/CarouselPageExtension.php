@@ -89,12 +89,12 @@ class CarouselPageExtension extends DataExtension
             ]);
 
         $settings = ToggleCompositeField::create('CarouselSettingsHD', 'Settings', [
-            DropdownField::create( 'Controls', 'Show Controls', $this->owner->dbObject('Controls')->enumValues() )
+            DropdownField::create('Controls', 'Show Controls', $this->owner->dbObject('Controls')->enumValues())
                 ->setDescription('Previous/next arrows. Hidden if only one slide'),
-            DropdownField::create( 'Indicators', 'Show Indicators', $this->owner->dbObject('Indicators')->enumValues() )
+            DropdownField::create('Indicators', 'Show Indicators', $this->owner->dbObject('Indicators')->enumValues())
                 ->setDescription(' Let users jump directly to a particular slide. Hidden if only one slide'),
-            DropdownField::create( 'Transitions', 'Transitions', $this->owner->dbObject('Transitions')->enumValues() ),
-            DropdownField::create( 'Autoplay', 'Autoplay', $this->owner->dbObject('Autoplay')->enumValues() ),
+            DropdownField::create('Transitions', 'Transitions', $this->owner->dbObject('Transitions')->enumValues()),
+            DropdownField::create('Autoplay', 'Autoplay', $this->owner->dbObject('Autoplay')->enumValues()),
             NumericField::create('Interval')
                 ->setDescription('Time in seconds'),
         ])->setHeadingLevel(4);
@@ -110,7 +110,7 @@ class CarouselPageExtension extends DataExtension
      */
     public function onBeforeWrite()
     {
-        if(!$this->owner->Interval || $this->owner->Interval < 0) {
+        if (!$this->owner->Interval || $this->owner->Interval < 0) {
             $this->owner->Interval = self::$defaults['Interval'];
         }
         parent::onBeforeWrite();
@@ -122,7 +122,7 @@ class CarouselPageExtension extends DataExtension
     public function IntervalInMilliseconds(): int
     {
         $interval = $this->owner->Interval;
-        if(!$this->owner->Interval || $this->owner->Interval < 0) {
+        if (!$this->owner->Interval || $this->owner->Interval < 0) {
             $interval = self::$defaults['Inverval'];
         }
         return (int) $interval * 1000;
