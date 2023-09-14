@@ -1,5 +1,5 @@
 <% if $Slides %>
-    <div id="carousel-{$ID}" class="carousel slide mb-5
+    <div id="carousel-{$ID}" class="carousel slide mb-3
         <% if Transitions == "Fade" %> carousel-fade<% end_if%>"
         <% if $Autoplay == "On" %>data-bs-ride="carousel" <% end_if %>
         <% if $Autoplay == "Autoplay after interaction" %>data-bs-ride="true" <% end_if %>>
