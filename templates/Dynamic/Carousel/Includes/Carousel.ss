@@ -14,9 +14,7 @@
             <% loop $Slides.Sort('SortOrder') %>
                 <div class="carousel-item<% if $IsFirst %> active<% end_if %>" <% if $Top.Autoplay != "Off" %>data-bs-interval="$Top.IntervalInMilliseconds" <% end_if %>>
                     <% if $ClassName.ShortName == ImageSlide %>
-                        <% include ImageSlide %>
-                    <% else_if $ClassName.ShortName == VideoSlide %>
-                        <% include VideoSlide UpID=$Up.ID %>
+                        <% include Dynamic\Carousel\ImageSlide %>
                     <% end_if %>
                 </div>
             <% end_loop %>
