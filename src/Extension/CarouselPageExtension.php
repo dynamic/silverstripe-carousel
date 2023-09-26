@@ -4,8 +4,11 @@ namespace Dynamic\Carousel\Extension;
 
 use SilverStripe\View\SSViewer;
 use Dynamic\Carousel\Model\Slide;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\CompositeField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
@@ -15,7 +18,6 @@ use Symbiote\GridFieldExtensions\GridFieldAddNewMultiClass;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use Symbiote\GridFieldExtensions\GridFieldAddExistingSearchButton;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
-use SilverStripe\Forms\NumericField;
 
 /**
  * Class \Dynamic\Carousel\Extension\CarouselPageExtension
@@ -88,7 +90,31 @@ class CarouselPageExtension extends DataExtension
                 new GridFieldAddExistingSearchButton(),
             ]);
 
-        $settings = ToggleCompositeField::create('CarouselSettingsHD', 'Settings', [
+        $fields->addFieldsToTab('Root.Carousel', [
+            $grid,
+        ]);
+    }
+
+    /**
+     * @return \SilverStripe\Forms\FieldList
+     */
+    public function updateSettingsFields(&$fields)
+    {
+        $fields->addFieldsToTab(
+            'Root.Settings',
+            [
+                CompositeField::create(
+                    $this->getCarouselSettings(),
+                )
+                    ->setTitle('Carousel Settings')
+                    ->setName('CarouselSettings'),
+            ]
+        );
+    }
+
+    public function getCarouselSettings()
+    {
+        return FieldList::create(
             DropdownField::create('Controls', 'Show Controls', $this->owner->dbObject('Controls')->enumValues())
                 ->setDescription('Previous/next arrows. Hidden if only one slide'),
             DropdownField::create('Indicators', 'Show Indicators', $this->owner->dbObject('Indicators')->enumValues())
@@ -97,12 +123,7 @@ class CarouselPageExtension extends DataExtension
             DropdownField::create('Autoplay', 'Autoplay', $this->owner->dbObject('Autoplay')->enumValues()),
             NumericField::create('Interval')
                 ->setDescription('Time in seconds'),
-        ])->setHeadingLevel(4);
-
-        $fields->addFieldsToTab('Root.Carousel', [
-            $grid,
-            $settings,
-        ]);
+        );
     }
 
     /**
