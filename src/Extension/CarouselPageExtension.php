@@ -99,7 +99,7 @@ class CarouselPageExtension extends DataExtension
                 ->setDescription('Time in seconds'),
         ])->setHeadingLevel(4);
 
-        $fields->addFieldsToTab('Root.Hero', [
+        $fields->addFieldsToTab('Root.Carousel', [
             $grid,
             $settings,
         ]);
