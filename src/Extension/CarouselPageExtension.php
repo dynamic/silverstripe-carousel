@@ -10,7 +10,6 @@ use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\CompositeField;
 use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridFieldFilterHeader;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
@@ -72,27 +71,29 @@ class CarouselPageExtension extends DataExtension
      */
     public function updateCMSFields(\SilverStripe\Forms\FieldList $fields)
     {
-        $grid = GridField::create(
-            'Slides',
-            'Slides',
-            $this->owner->Slides(),
-            GridFieldConfig_RelationEditor::create()
-        );
-        $grid->getConfig()
-            ->removeComponentsByType([
-                GridFieldAddNewButton::class,
-                GridFieldAddExistingAutocompleter::class,
-                GridFieldFilterHeader::class,
-            ])
-            ->addComponents([
-                $multiClass = GridFieldAddNewMultiClass::create(),
-                new GridFieldOrderableRows('SortOrder'),
-                new GridFieldAddExistingSearchButton(),
-            ]);
+        if ($this->owner->exists()) {
+            $grid = GridField::create(
+                'Slides',
+                'Slides',
+                $this->owner->Slides(),
+                GridFieldConfig_RelationEditor::create()
+            );
+            $grid->getConfig()
+                ->removeComponentsByType([
+                    GridFieldAddNewButton::class,
+                    GridFieldAddExistingAutocompleter::class,
+                    GridFieldFilterHeader::class,
+                ])
+                ->addComponents([
+                    $multiClass = GridFieldAddNewMultiClass::create(),
+                    new GridFieldOrderableRows('SortOrder'),
+                    new GridFieldAddExistingSearchButton(),
+                ]);
 
-        $fields->addFieldsToTab('Root.Carousel', [
-            $grid,
-        ]);
+            $fields->addFieldsToTab('Root.Carousel', [
+                $grid,
+            ]);
+        }
     }
 
     /**
