@@ -145,7 +145,7 @@ class CarouselPageExtension extends DataExtension
     {
         $interval = $this->owner->Interval;
         if (!$this->owner->Interval || $this->owner->Interval < 0) {
-            $interval = self::$defaults['Inverval'];
+            $interval = self::$defaults['Interval'];
         }
         return (int) $interval * 1000;
     }
