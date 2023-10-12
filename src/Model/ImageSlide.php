@@ -3,10 +3,14 @@
 namespace Dynamic\Carousel\Model;
 
 use SilverStripe\Assets\Image;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\LinkField\ORM\DBLink;
+use SilverStripe\LinkField\Form\LinkField;
 
 /**
  * Class \Dynamic\Carousel\Model\ImageSlide
  *
+ * @property string $DbLink
  * @property int $ImageID
  * @method Image Image()
  */
@@ -27,6 +31,10 @@ class ImageSlide extends Slide
      */
     private static $plural_name = 'Image Slides';
 
+    private static $db = [
+        'DbLink' => DBLink::class
+    ];
+
     /**
      * @var string[]
      */
@@ -42,4 +50,22 @@ class ImageSlide extends Slide
     ];
 
     private static $hide_ancestor = Slide::class;
+
+    public function getCMSFields(): FieldList
+    {
+        $this->beforeUpdateCMSFields(function (FieldList $fields) {
+            $fields->addFieldsToTab(
+                'Root.Main',
+                [
+                    $fields->dataFieldByName('Image')
+                        ->setFolderName('Uploads/Carousel/Slides'),
+                    LinkField::create('DbLink')
+                        ->setTitle('Link'),
+                ],
+                'Content'
+            );
+        });
+
+        return parent::getCMSFields();;
+    }
 }
