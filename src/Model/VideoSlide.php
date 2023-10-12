@@ -9,6 +9,7 @@ use SilverStripe\Forms\FieldList;
  * Class \Dynamic\Carousel\Model\VideoSlide
  *
  * @property string $VideoType
+ * @property string $VideoEmbed
  * @property int $VideoID
  * @method File Video()
  */
@@ -34,6 +35,7 @@ class VideoSlide extends Slide
      */
     private static $db = [
         'VideoType' => 'Enum(["Embed","Native"], "Embed")',
+        'VideoEmbed' => 'Text',
     ];
 
     /**
@@ -56,7 +58,11 @@ class VideoSlide extends Slide
     public function getCMSFields(): FieldList
     {
         $this->beforeUpdateCMSFields(function (FieldList $fields) {
-            //$fields->
+            $fields->dataFieldByName('Video')
+                ->displayIf('VideoType')->isEqualTo('Native');
+
+            $fields->dataFieldByName('VideoEmbed')
+                ->displayIf('VideoType')->isEqualTo('Embed');
         });
 
         return parent::getCMSFields();
