@@ -2,11 +2,11 @@
 
 namespace Dynamic\Carousel\Model;
 
-use SilverStripe\Forms\CheckboxField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Security\Member;
 use SilverStripe\Forms\NumericField;
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Security\Permission;
 use SilverStripe\Versioned\Versioned;
 use DNADesign\Elemental\Forms\TextCheckboxGroupField;
@@ -101,7 +101,7 @@ class Slide extends DataObject
             } else {
                 $fields->insertAfter(
                     'Title',
-                    $fields->CheckboxField::create('ShowTitle')
+                    CheckboxField::create('ShowTitle')
                 );
             }
         });
