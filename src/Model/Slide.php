@@ -2,13 +2,14 @@
 
 namespace Dynamic\Carousel\Model;
 
-use Dynamic\Carousel\Forms\TextCheckboxGroupField;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\NumericField;
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\Security\Member;
+use SilverStripe\Forms\NumericField;
 use SilverStripe\Security\Permission;
 use SilverStripe\Versioned\Versioned;
+use DNADesign\Elemental\Forms\TextCheckboxGroupField;
 
 /**
  * Class \Dynamic\Carousel\Model\Slide
@@ -92,10 +93,17 @@ class Slide extends DataObject
                 'ParentClass',
             ]);
 
-            $fields->replaceField(
-                'Title',
-                TextCheckboxGroupField::create('Title')
-            );
+            if (class_exists(TextCheckboxGroupField::class)) {
+                $fields->replaceField(
+                    'Title',
+                    TextCheckboxGroupField::create('Title')
+                );
+            } else {
+                $fields->insertAfter(
+                    'Title',
+                    $fields->CheckboxField::create('ShowTitle')
+                );
+            }
         });
 
         return parent::getCMSFields();
