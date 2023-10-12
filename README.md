@@ -29,7 +29,7 @@ To add a carousel to a page, apply `CarouselPageExtension` to a page type:
 ```yaml
 Page:
   extensions:
-    - Dynamic\Carousel\Extensions\CarouselPageExtension
+    - Dynamic\Carousel\Extension\CarouselPageExtension
 ```
 
 In your template, include the `Carousel` template:
