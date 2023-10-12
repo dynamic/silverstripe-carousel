@@ -66,6 +66,7 @@ class ImageSlide extends Slide
             );
         });
 
-        return parent::getCMSFields();;
+        return parent::getCMSFields();
+        ;
     }
 }
