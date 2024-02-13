@@ -18,25 +18,33 @@ class ImageSlide extends Slide
 {
     /**
      * @var string
+     * @config
      */
     private static $table_name = 'Dynamic_ImageSlide';
 
     /**
      * @var string
+     * @config
      */
     private static $singular_name = 'Image Slide';
 
     /**
      * @var string
+     * @config
      */
     private static $plural_name = 'Image Slides';
 
+    /**
+     * @var array
+     * @config
+     */
     private static $db = [
         'DbLink' => DBLink::class
     ];
 
     /**
      * @var string[]
+     * @config
      */
     private static $has_one = [
         'Image' => Image::class,
@@ -44,19 +52,28 @@ class ImageSlide extends Slide
 
     /**
      * @var string[]
+     * @config
      */
     private static $owns = [
         'Image',
     ];
 
-    private static $hide_ancestor = Slide::class;
+    /**
+     * @var array
+     * @config
+     */
+    private static $hide_ancestor = [Slide::class];
 
+    /**
+     * @return FieldList
+     */
     public function getCMSFields(): FieldList
     {
         $this->beforeUpdateCMSFields(function (FieldList $fields) {
             $fields->addFieldsToTab(
                 'Root.Main',
                 [
+                    // @phpstan-ignore-next-line
                     $fields->dataFieldByName('Image')
                         ->setFolderName('Uploads/Carousel/Slides'),
                     LinkField::create('DbLink')

@@ -33,6 +33,7 @@ class CarouselPageExtension extends DataExtension
 {
     /**
      * @var array
+     * @config
      */
     private static $db = [
         'Controls' => 'Enum("Off,On", "On")',
@@ -44,6 +45,7 @@ class CarouselPageExtension extends DataExtension
 
     /**
      * @var array
+     * @config
      */
     private static $many_many = [
         'Slides' => 'Dynamic\\Carousel\\Model\\Slide',
@@ -51,6 +53,7 @@ class CarouselPageExtension extends DataExtension
 
     /**
      * @var array
+     * @config
      */
     private static $many_many_extraFields = [
         'Slides' => [
@@ -60,6 +63,7 @@ class CarouselPageExtension extends DataExtension
 
     /**
      * @var array
+     * @config
      */
     private static $defaults = [
         'Interval' => 5
@@ -113,6 +117,9 @@ class CarouselPageExtension extends DataExtension
         );
     }
 
+    /**
+     * @return \SilverStripe\Forms\FieldList
+     */
     public function getCarouselSettings()
     {
         return FieldList::create(

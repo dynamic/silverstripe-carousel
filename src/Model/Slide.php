@@ -27,21 +27,25 @@ class Slide extends DataObject
 {
     /**
      * @var string
+     * @config
      */
     private static $table_name = 'Dynamic_Slide';
 
     /**
      * @var string
+     * @config
      */
     private static $singular_name = 'Slide';
 
     /**
      * @var string
+     * @config
      */
     private static $plural_name = 'Slides';
 
     /**
-     * @var string[]
+     * @var array
+     * @config
      */
     private static $db = [
         'Title' => 'Varchar',
@@ -51,21 +55,24 @@ class Slide extends DataObject
     ];
 
     /**
-     * @var string[]
+     * @var array
+     * @config
      */
     private static $has_one = [
         'Parent' => DataObject::class,
     ];
 
     /**
-     * @var string[]
+     * @var array
+     * @config
      */
     private static $extensions = [
         Versioned::class,
     ];
 
     /**
-     * @var string[]
+     * @var array
+     * @config
      */
     private static $summary_fields = [
         'Title' => 'Slide Title',
@@ -73,6 +80,7 @@ class Slide extends DataObject
 
     /**
      * @var array
+     * @config
      */
     private static $searchable_fields = [
         'ID' => [
