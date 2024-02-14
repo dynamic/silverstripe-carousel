@@ -91,6 +91,21 @@ class Slide extends DataObject
     ];
 
     /**
+     * @param bool $includerelations
+     * @return array
+     */
+    public function fieldLabels($includerelations = true)
+    {
+        $labels = parent::fieldLabels($includerelations);
+
+        $labels['Title'] = _t(__CLASS__ . '.TitleLabel', 'Title');
+        $labels['Image'] = _t(__CLASS__ . '.ImageLabel', 'Image');
+        $labels['Content'] = _t(__CLASS__ . '.ContentLabel', 'Description');
+
+        return $labels;
+    }
+
+    /**
      * @return FieldList
      */
     public function getCMSFields(): FieldList
@@ -105,6 +120,7 @@ class Slide extends DataObject
                 $fields->replaceField(
                     'Title',
                     TextCheckboxGroupField::create('Title')
+                        ->setTitle($this->fieldLabel('Title'))
                 );
             } else {
                 $fields->insertAfter(
