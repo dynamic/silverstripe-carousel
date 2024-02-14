@@ -130,7 +130,7 @@ class Slide extends DataObject
             return $extended;
         }
 
-        if ($this->Parent()->exists()) {
+        if ($this->Parent()) {
             $parent = $this->Parent();
             return $parent->canView($member);
         }
@@ -152,7 +152,7 @@ class Slide extends DataObject
             return $extended;
         }
 
-        if ($this->Parent()->exists()) {
+        if ($this->Parent()) {
             $parent = $this->Parent();
             return $parent->canEdit($member);
         }

@@ -43,7 +43,7 @@ class ImageSlide extends Slide
     ];
 
     /**
-     * @var string[]
+     * @var array
      * @config
      */
     private static $has_one = [
@@ -51,7 +51,7 @@ class ImageSlide extends Slide
     ];
 
     /**
-     * @var string[]
+     * @var array
      * @config
      */
     private static $owns = [
@@ -59,10 +59,10 @@ class ImageSlide extends Slide
     ];
 
     /**
-     * @var array
+     * @var string
      * @config
      */
-    private static $hide_ancestor = [Slide::class];
+    private static $hide_ancestor = Slide::class;
 
     /**
      * @return FieldList
