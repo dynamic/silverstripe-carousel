@@ -75,7 +75,7 @@ class CarouselPageExtension extends DataExtension
      */
     public function updateCMSFields(\SilverStripe\Forms\FieldList $fields)
     {
-        if ($this->owner->exists()) {
+        if ($this->getOwner()->exists()) {
             $grid = GridField::create(
                 'Slides',
                 'Slides',
@@ -101,7 +101,7 @@ class CarouselPageExtension extends DataExtension
     }
 
     /**
-     * @return \SilverStripe\Forms\FieldList
+     * @param \SilverStripe\Forms\FieldList $fields
      */
     public function updateSettingsFields(&$fields)
     {
@@ -123,35 +123,37 @@ class CarouselPageExtension extends DataExtension
     public function getCarouselSettings()
     {
         return FieldList::create(
-            DropdownField::create('Controls', 'Show Controls', $this->owner->dbObject('Controls')->enumValues())
+            DropdownField::create('Controls', 'Show Controls', $this->getOwner()->dbObject('Controls')->enumValues())
                 ->setDescription('Previous/next arrows. Hidden if only one slide'),
-            DropdownField::create('Indicators', 'Show Indicators', $this->owner->dbObject('Indicators')->enumValues())
+            DropdownField::create('Indicators', $this->getOwner()->dbObject('Indicators')->enumValues())
+                ->setTitle('Show Indicators')
                 ->setDescription(' Let users jump directly to a particular slide. Hidden if only one slide'),
-            DropdownField::create('Transitions', 'Transitions', $this->owner->dbObject('Transitions')->enumValues()),
-            DropdownField::create('Autoplay', 'Autoplay', $this->owner->dbObject('Autoplay')->enumValues()),
+            DropdownField::create('Transitions', $this->getOwner()->dbObject('Transitions')->enumValues())
+                ->setTitle('Transitions'),
+            DropdownField::create('Autoplay', 'Autoplay', $this->getOwner()->dbObject('Autoplay')->enumValues()),
             NumericField::create('Interval')
                 ->setDescription('Time in seconds'),
         );
     }
 
     /**
-     * @return string
+     * @return void
      */
     public function onBeforeWrite()
     {
-        if (!$this->owner->Interval || $this->owner->Interval < 0) {
-            $this->owner->Interval = self::$defaults['Interval'];
+        if (!$this->getOwner()->Interval || $this->getOwner()->Interval < 0) {
+            $this->getOwner()->Interval = self::$defaults['Interval'];
         }
         parent::onBeforeWrite();
     }
 
     /**
-     * @return string
+     * @return int
      */
     public function IntervalInMilliseconds(): int
     {
-        $interval = $this->owner->Interval;
-        if (!$this->owner->Interval || $this->owner->Interval < 0) {
+        $interval = $this->getOwner()->Interval;
+        if (!$this->getOwner()->Interval || $this->getOwner()->Interval < 0) {
             $interval = self::$defaults['Interval'];
         }
         return (int) $interval * 1000;

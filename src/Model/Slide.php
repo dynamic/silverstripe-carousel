@@ -130,10 +130,9 @@ class Slide extends DataObject
             return $extended;
         }
 
-        if ($this->Parent()) {
-            if ($parent = $this->Parent()) {
-                return $parent->canView($member);
-            }
+        if ($this->Parent()->exists()) {
+            $parent = $this->Parent();
+            return $parent->canView($member);
         }
 
         return (Permission::check('CMS_ACCESS', 'any', $member)) ? true : null;
@@ -153,10 +152,9 @@ class Slide extends DataObject
             return $extended;
         }
 
-        if ($this->Parent()) {
-            if ($parent = $this->Parent()) {
-                return $parent->canEdit($member);
-            }
+        if ($this->Parent()->exists()) {
+            $parent = $this->Parent();
+            return $parent->canEdit($member);
         }
 
         return (Permission::check('CMS_ACCESS', 'any', $member)) ? true : null;
@@ -181,13 +179,13 @@ class Slide extends DataObject
             return $extended;
         }
 
-        if ($this->Parent()) {
-            if ($parent = $this->Parent()) {
-                if ($parent->hasExtension(Versioned::class)) {
-                    return $parent->canArchive($member);
-                } else {
-                    return $parent->canDelete($member);
-                }
+        if ($this->Parent()->exists()) {
+            $parent = $this->Parent();
+            if ($parent->hasExtension(Versioned::class)) {
+                // @phpstan-ignore-next-line
+                return $parent->canArchive($member);
+            } else {
+                return $parent->canDelete($member);
             }
         }
 
