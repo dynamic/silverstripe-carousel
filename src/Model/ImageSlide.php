@@ -4,8 +4,8 @@ namespace Dynamic\Carousel\Model;
 
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\LinkField\ORM\DBLink;
 use SilverStripe\LinkField\Form\LinkField;
+use SilverStripe\LinkField\Models\Link;
 
 /**
  * Class \Dynamic\Carousel\Model\ImageSlide
@@ -38,16 +38,9 @@ class ImageSlide extends Slide
      * @var array
      * @config
      */
-    private static $db = [
-        'DbLink' => DBLink::class
-    ];
-
-    /**
-     * @var array
-     * @config
-     */
     private static $has_one = [
         'Image' => Image::class,
+        'ElementLink' => Link::class,
     ];
 
     /**
@@ -65,19 +58,37 @@ class ImageSlide extends Slide
     private static $hide_ancestor = Slide::class;
 
     /**
+     * @param bool $includerelations
+     * @return array
+     */
+    public function fieldLabels($includerelations = true)
+    {
+        $labels = parent::fieldLabels($includerelations);
+
+        $labels['ElementLink'] = _t(__CLASS__ . '.ElementLinkLabel', 'Link');
+
+        return $labels;
+    }
+
+    /**
      * @return FieldList
      */
     public function getCMSFields(): FieldList
     {
         $this->beforeUpdateCMSFields(function (FieldList $fields) {
+            $fields->replaceField(
+                'ElementLinkID',
+                $link = LinkField::create('ElementLink')
+                    ->setTitle($this->fieldLabel('ElementLink'))
+            );
+
             $fields->addFieldsToTab(
                 'Root.Main',
                 [
                     // @phpstan-ignore-next-line
                     $fields->dataFieldByName('Image')
                         ->setFolderName('Uploads/Carousel/Slides'),
-                    LinkField::create('DbLink')
-                        ->setTitle('Link'),
+                    $link
                 ],
                 'Content'
             );
