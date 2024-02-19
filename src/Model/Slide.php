@@ -63,6 +63,13 @@ class Slide extends DataObject
     ];
 
     /**
+     * @var array|string[]
+     */
+    private static array $belongs_many_many = [
+        'OwnerObjects' => DataObject::class,
+    ];
+
+    /**
      * @var array
      * @config
      */
