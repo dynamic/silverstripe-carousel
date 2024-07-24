@@ -15,6 +15,8 @@
                 <div class="carousel-item<% if $IsFirst %> active<% end_if %>" <% if $Top.Autoplay != "Off" %>data-bs-interval="$Top.IntervalInMilliseconds" <% end_if %>>
                     <% if $ClassName.ShortName == ImageSlide %>
                         <% include Dynamic\Carousel\ImageSlide %>
+                    <% else_if $ClassName.ShortName == VideoSlide %>
+                        <% include Dynamic\Carousel\VideoSlide %>
                     <% end_if %>
                 </div>
             <% end_loop %>
