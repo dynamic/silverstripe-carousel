@@ -75,8 +75,8 @@ class VideoSlide extends Slide
                 ->displayIf('VideoType')->isEqualTo('Embed');
 
             $fields->dataFieldByName('iFrameCSS')
-                ->displayIf('VideoType')->isEqualTo('Embed')
-                ->setDescription('Add CSS classes to the iFrame');
+                ->setDescription('Add CSS classes to the iFrame')
+                ->displayIf('VideoType')->isEqualTo('Embed');
         });
 
 
