@@ -8,6 +8,7 @@
         "CMS"
     ],
     "require": {
+        "embed/embed": "^4.0",
         "jonom/focuspoint": "^5",
         "silverstripe/linkfield":"^3.0",
         "silverstripe/recipe-cms": "^5.0",
