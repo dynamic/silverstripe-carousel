@@ -49,6 +49,7 @@ class ImageSlide extends Slide
      */
     private static $owns = [
         'Image',
+        'ElementLink',
     ];
 
     /**
