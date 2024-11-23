@@ -34,6 +34,7 @@ class VideoSlide extends Slide
      */
     private static $db = [
         'VideoType' => 'Enum(["Embed","Native"], "Embed")',
+        'VideoURL' => 'Varchar(255)',
     ];
 
     /**
@@ -56,7 +57,11 @@ class VideoSlide extends Slide
     public function getCMSFields(): FieldList
     {
         $this->beforeUpdateCMSFields(function (FieldList $fields) {
-            //$fields->
+            $native = $fields->dataFieldByName('Video');
+            $embed = $fields->dataFieldByName('VideoURL');
+
+            $native->displayIf('VideoType')->isEqualTo('Native')->end();
+            $embed->displayIf('VideoType')->isEqualTo('Embed')->end();
         });
 
         return parent::getCMSFields();

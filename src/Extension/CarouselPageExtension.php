@@ -2,10 +2,11 @@
 
 namespace Dynamic\Carousel\Extension;
 
+use SilverStripe\Core\Extension;
+use SilverStripe\ORM\ManyManyList;
 use SilverStripe\View\SSViewer;
 use Dynamic\Carousel\Model\Slide;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\CompositeField;
@@ -29,7 +30,7 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * @property int $Interval
  * @method ManyManyList|Slide[] Slides()
  */
-class CarouselPageExtension extends DataExtension
+class CarouselPageExtension extends Extension
 {
     /**
      * @var array
@@ -48,7 +49,7 @@ class CarouselPageExtension extends DataExtension
      * @config
      */
     private static $many_many = [
-        'Slides' => 'Dynamic\\Carousel\\Model\\Slide',
+        'Slides' => Slide::class,
     ];
 
     /**
@@ -76,6 +77,8 @@ class CarouselPageExtension extends DataExtension
     public function updateCMSFields(\SilverStripe\Forms\FieldList $fields)
     {
         if ($this->getOwner()->exists()) {
+            $fields->removeByName('Slides');
+
             $grid = GridField::create(
                 'Slides',
                 'Slides',
