@@ -9,7 +9,8 @@
     ],
     "require": {
         "jonom/focuspoint": "^5",
-        "silverstripe/linkfield":"^4.0",
+        "nathancox/embedfield": "^3.0",
+        "silverstripe/linkfield": "^4.0",
         "silverstripe/recipe-cms": "^5.0",
         "symbiote/silverstripe-gridfieldextensions": "^4"
     },
