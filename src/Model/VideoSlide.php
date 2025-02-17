@@ -67,9 +67,14 @@ class VideoSlide extends Slide
                 'Video',
             ]);
 
+            $fields->insertBefore(
+                'Content',
+                $fields->dataFieldByName('VideoType')
+            );
+
             // Native video
             $uploadVideo = UploadField::create('Video', 'Upload video')
-            ->setFolderName('Uploads/Carousel/Videos');
+                ->setFolderName('Uploads/Carousel/Videos');
 
             $fields->insertAfter(
                 'VideoType',
