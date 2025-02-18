@@ -4,8 +4,9 @@ namespace Dynamic\Carousel\Model;
 
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\LinkField\Form\LinkField;
 use SilverStripe\LinkField\Models\Link;
+use SilverStripe\LinkField\Form\LinkField;
+use SilverStripe\AssetAdmin\Forms\UploadField;
 
 /**
  * Class \Dynamic\Carousel\Model\ImageSlide
@@ -40,6 +41,7 @@ class ImageSlide extends Slide
      */
     private static $has_one = [
         'Image' => Image::class,
+        'ImageMobile' => Image::class,
         'ElementLink' => Link::class,
     ];
 
@@ -49,6 +51,7 @@ class ImageSlide extends Slide
      */
     private static $owns = [
         'Image',
+        'ImageMobile',
         'ElementLink',
     ];
 
@@ -82,6 +85,7 @@ class ImageSlide extends Slide
                 $link = LinkField::create('ElementLink')
                     ->setTitle($this->fieldLabel('ElementLink'))
             );
+            $link->setDescription('Optional. Leave blank to hide.');
 
             $fields->addFieldsToTab(
                 'Root.Main',
@@ -93,6 +97,21 @@ class ImageSlide extends Slide
                 ],
                 'Content'
             );
+
+            // Image for small screens
+            $fields->insertAfter(
+                'Image',
+                UploadField::create('ImageMobile', 'Image (for small screens)')
+                ->setFolderName('Uploads/Carousel/Slides')
+                ->setDescription('Optional.')
+            );
+
+            if (
+                $this->getOwner()->hasField('ParentID') &&
+                $this->getOwner()->Parent() instanceof \SilverStripe\CMS\Model\SiteTree
+            ) {
+                $fields->dataFieldByName('Image')->setDescription('Recommended size: 1920x823');
+            }
         });
 
         return parent::getCMSFields();

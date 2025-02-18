@@ -134,6 +134,16 @@ class Slide extends DataObject
     }
 
     /**
+     * ShowCaption
+     */
+    public function ShowCaption(): bool
+    {
+        $owner = $this->getOwner();
+
+        return (($owner->Title && $owner->ShowTitle) || $owner->SubTitle || $owner->Content);
+    }
+
+    /**
      * Basic permissions, defaults to parent perms where possible.
      *
      * @param Member $member
