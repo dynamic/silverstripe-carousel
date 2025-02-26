@@ -90,7 +90,6 @@ class ImageSlide extends Slide
             $fields->addFieldsToTab(
                 'Root.Main',
                 [
-                    // @phpstan-ignore-next-line
                     $fields->dataFieldByName('Image')
                         ->setFolderName('Uploads/Carousel/Slides'),
                     $link

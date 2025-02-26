@@ -208,7 +208,6 @@ class Slide extends DataObject
         if ($this->Parent()->exists()) {
             $parent = $this->Parent();
             if ($parent->hasExtension(Versioned::class)) {
-                // @phpstan-ignore-next-line
                 return $parent->canArchive($member);
             } else {
                 return $parent->canDelete($member);
