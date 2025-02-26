@@ -65,6 +65,14 @@ class CarouselPageExtension extends DataExtension
      * @var array
      * @config
      */
+    private static $owns = [
+        'Slides',
+    ];
+
+    /**
+     * @var array
+     * @config
+     */
     private static $defaults = [
         'Interval' => 5
     ];
