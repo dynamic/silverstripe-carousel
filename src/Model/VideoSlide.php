@@ -45,6 +45,7 @@ class VideoSlide extends Slide
      */
     private static $has_one = [
         'Video' => File::class,
+        // @phpstan-ignore class.notFound
         'EmbedVideo' => EmbedObject::class,
     ];
 
