@@ -73,6 +73,22 @@ class CarouselPageExtension extends DataExtension
      * @var array
      * @config
      */
+    private static $cascade_duplicates = [
+        'Slides',
+    ];
+
+    /**
+     * @var array
+     * @config
+     */
+    private static array $cascade_deletes = [
+        'Slides',
+    ];
+
+    /**
+     * @var array
+     * @config
+     */
     private static $defaults = [
         'Interval' => 5
     ];
