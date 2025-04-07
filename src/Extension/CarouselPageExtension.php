@@ -149,11 +149,9 @@ class CarouselPageExtension extends DataExtension
         return FieldList::create(
             DropdownField::create('Controls', 'Show Controls', $this->getOwner()->dbObject('Controls')->enumValues())
                 ->setDescription('Previous/next arrows. Hidden if only one slide'),
-            DropdownField::create('Indicators', $this->getOwner()->dbObject('Indicators')->enumValues())
-                ->setTitle('Show Indicators')
+            DropdownField::create('Indicators', 'Show Indicators', $this->getOwner()->dbObject('Indicators')->enumValues())
                 ->setDescription(' Let users jump directly to a particular slide. Hidden if only one slide'),
-            DropdownField::create('Transitions', $this->getOwner()->dbObject('Transitions')->enumValues())
-                ->setTitle('Transitions'),
+            DropdownField::create('Transitions', 'Transitions', $this->getOwner()->dbObject('Transitions')->enumValues()),
             DropdownField::create('Autoplay', 'Autoplay', $this->getOwner()->dbObject('Autoplay')->enumValues()),
             NumericField::create('Interval')
                 ->setDescription('Time in seconds'),
