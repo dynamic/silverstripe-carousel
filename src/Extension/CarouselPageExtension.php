@@ -40,7 +40,7 @@ class CarouselPageExtension extends DataExtension
         'Indicators' => 'Enum("Off,On", "On")',
         'Transitions' => 'Enum("Slide,Fade", "Slide")',
         'Autoplay' => 'Enum("Off,Autoplay after interaction,On","Off")',
-        'Interval' => 'Int'
+        'Interval' => 'Int',
     ];
 
     /**
@@ -90,7 +90,7 @@ class CarouselPageExtension extends DataExtension
      * @config
      */
     private static $defaults = [
-        'Interval' => 5
+        'Interval' => 5,
     ];
 
     /**
@@ -147,11 +147,14 @@ class CarouselPageExtension extends DataExtension
     public function getCarouselSettings()
     {
         return FieldList::create(
-            DropdownField::create('Controls', 'Show Controls', $this->getOwner()->dbObject('Controls')->enumValues())
+            DropdownField::create('Controls', 'Show Controls')
+                ->setSource($this->getOwner()->dbObject('Controls')->enumValues())
                 ->setDescription('Previous/next arrows. Hidden if only one slide'),
-            DropdownField::create('Indicators', 'Show Indicators', $this->getOwner()->dbObject('Indicators')->enumValues())
+            DropdownField::create('Indicators', 'Show Indicators')
+                ->setSource($this->getOwner()->dbObject('Indicators')->enumValues())
                 ->setDescription(' Let users jump directly to a particular slide. Hidden if only one slide'),
-            DropdownField::create('Transitions', 'Transitions', $this->getOwner()->dbObject('Transitions')->enumValues()),
+            DropdownField::create('Transitions', 'Transitions')
+                ->setSource($this->getOwner()->dbObject('Transitions')->enumValues()),
             DropdownField::create('Autoplay', 'Autoplay', $this->getOwner()->dbObject('Autoplay')->enumValues()),
             NumericField::create('Interval')
                 ->setDescription('Time in seconds'),
@@ -178,7 +181,7 @@ class CarouselPageExtension extends DataExtension
         if (!$this->getOwner()->Interval || $this->getOwner()->Interval < 0) {
             $interval = self::$defaults['Interval'];
         }
-        return (int) $interval * 1000;
+        return (int)$interval * 1000;
     }
 
     /**
