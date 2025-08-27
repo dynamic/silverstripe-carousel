@@ -48,10 +48,16 @@ class CarouselPageExtension extends DataExtension
      * @config
      */
     private static $many_many = [
+        'Slides' => 'Dynamic\\Carousel\\Model\\Slide',
+    ];
+
+    /**
+     * @var array
+     * @config
+     */
+    private static $many_many_extraFields = [
         'Slides' => [
-            'through' => 'Dynamic\\Carousel\\Model\\CarouselSlideJoin',
-            'from' => 'Parent',
-            'to' => 'Slide',
+            'SortOrder' => 'Int',
         ],
     ];
 
