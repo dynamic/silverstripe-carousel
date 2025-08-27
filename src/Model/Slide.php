@@ -56,7 +56,7 @@ class Slide extends DataObject
      * @config
      */
     private static $belongs_many_many = [
-        'Parents' => 'Dynamic\\Carousel\\Extension\\CarouselPageExtension',
+        'Parents' => DataObject::class,
     ];
 
     /**
