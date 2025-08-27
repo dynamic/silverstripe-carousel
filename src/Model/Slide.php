@@ -18,9 +18,7 @@ use DNADesign\Elemental\Forms\TextCheckboxGroupField;
  * @property string $Title
  * @property bool $ShowTitle
  * @property string $Content
- * @property string $ParentClass
- * @property int $ParentID
- * @method DataObject Parent()
+ * @method \SilverStripe\ORM\ManyManyThroughList Parents()
  * @mixin Versioned
  */
 class Slide extends DataObject
@@ -51,15 +49,18 @@ class Slide extends DataObject
         'Title' => 'Varchar',
         'ShowTitle' => 'Boolean',
         'Content' => 'HTMLText',
-        'ParentClass' => 'Varchar',
     ];
 
     /**
      * @var array
      * @config
      */
-    private static $has_one = [
-        'Parent' => DataObject::class,
+    private static $belongs_many_many = [
+        'Parents' => [
+            'through' => 'Dynamic\\Carousel\\Model\\CarouselSlideJoin',
+            'from' => 'Slide',
+            'to' => 'Parent',
+        ],
     ];
 
     /**
@@ -144,7 +145,7 @@ class Slide extends DataObject
     }
 
     /**
-     * Basic permissions, defaults to parent perms where possible.
+     * Basic permissions - simplified since slides no longer have direct parent references
      *
      * @param Member $member
      * @return boolean
@@ -156,16 +157,11 @@ class Slide extends DataObject
             return $extended;
         }
 
-        if ($this->Parent()) {
-            $parent = $this->Parent();
-            return $parent->canView($member);
-        }
-
         return (Permission::check('CMS_ACCESS', 'any', $member)) ? true : null;
     }
 
     /**
-     * Basic permissions, defaults to parent perms where possible.
+     * Basic permissions - simplified since slides no longer have direct parent references
      *
      * @param Member $member
      *
@@ -178,20 +174,11 @@ class Slide extends DataObject
             return $extended;
         }
 
-        if ($this->Parent()) {
-            $parent = $this->Parent();
-            return $parent->canEdit($member);
-        }
-
         return (Permission::check('CMS_ACCESS', 'any', $member)) ? true : null;
     }
 
     /**
-     * Basic permissions, defaults to page perms where possible.
-     *
-     * Uses archive not delete so that current stage is respected i.e if a
-     * slide is not published, then it can be deleted by someone who doesn't
-     * have publishing permissions.
+     * Basic permissions - simplified since slides no longer have direct parent references
      *
      * @param Member $member
      *
@@ -200,19 +187,10 @@ class Slide extends DataObject
     public function canDelete($member = null)
     {
         $extended = $this->extendedCan(__FUNCTION__, $member);
-
         if ($extended !== null) {
             return $extended;
         }
 
-        if ($this->Parent()->exists()) {
-            $parent = $this->Parent();
-            if ($parent->hasExtension(Versioned::class)) {
-                return $parent->canArchive($member);
-            } else {
-                return $parent->canDelete($member);
-            }
-        }
 
         return (Permission::check('CMS_ACCESS', 'any', $member)) ? true : null;
     }
