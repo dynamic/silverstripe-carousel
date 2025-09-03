@@ -119,8 +119,7 @@ class Slide extends DataObject
             if (class_exists(TextCheckboxGroupField::class)) {
                 $fields->replaceField(
                     'Title',
-                    TextCheckboxGroupField::create()
-                        ->setName('Title')
+                    TextCheckboxGroupField::create('Title')
                         ->setTitle($this->fieldLabel('Title'))
                 );
             } else {
