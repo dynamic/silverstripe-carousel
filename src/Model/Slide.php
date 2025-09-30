@@ -55,14 +55,6 @@ class Slide extends DataObject
      * @var array
      * @config
      */
-    private static $belongs_many_many = [
-        'Parents' => DataObject::class,
-    ];
-
-    /**
-     * @var array
-     * @config
-     */
     private static $extensions = [
         Versioned::class,
     ];
