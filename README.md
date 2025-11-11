@@ -2,12 +2,9 @@
 
 A versatile carousel module for Silverstripe websites, featuring support for images and videos. The default template utilizes Bootstrap classes for seamless integration.
 
-[![CI](https://github.com/dynamic/silverstripe-carousel/workflows/CI/badge.svg)](https://github.com/dynamic/silverstripe-carousel/actions)  
-[![Latest Stable Version](https://poser.pugx.org/dynamic/silverstripe-carousel/v/stable)](https://packagist.org/packages/dynamic/silverstripe-carousel)  
-[![Total Downloads](https://poser.pugx.org/dynamic/silverstripe-carousel/downloads)](https://packagist.org/packages/dynamic/silverstripe-carousel)  
-[![License](https://poser.pugx.org/dynamic/silverstripe-carousel/license)](https://packagist.org/packages/dynamic/silverstripe-carousel)  
+[![CI](https://github.com/dynamic/silverstripe-carousel/workflows/CI/badge.svg)](https://github.com/dynamic/silverstripe-carousel/actions) [![Sponsor](https://img.shields.io/badge/Sponsor-Dynamic-brightgreen)](https://github.com/sponsors/dynamic)
 
-[![Sponsor](https://img.shields.io/badge/Sponsor-Dynamic-brightgreen)](https://github.com/sponsors/dynamic)
+[![Latest Stable Version](https://poser.pugx.org/dynamic/silverstripe-carousel/v/stable)](https://packagist.org/packages/dynamic/silverstripe-carousel) [![Total Downloads](https://poser.pugx.org/dynamic/silverstripe-carousel/downloads)](https://packagist.org/packages/dynamic/silverstripe-carousel) [![Latest Unstable Version](https://poser.pugx.org/dynamic/silverstripe-carousel/v/unstable)](https://packagist.org/packages/dynamic/silverstripe-carousel) [![License](https://poser.pugx.org/dynamic/silverstripe-carousel/license)](https://packagist.org/packages/dynamic/silverstripe-carousel)
 
 ## Table of Contents
 
