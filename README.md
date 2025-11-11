@@ -7,6 +7,8 @@ A versatile carousel module for Silverstripe websites, featuring support for ima
 [![Total Downloads](https://poser.pugx.org/dynamic/silverstripe-carousel/downloads)](https://packagist.org/packages/dynamic/silverstripe-carousel)  
 [![License](https://poser.pugx.org/dynamic/silverstripe-carousel/license)](https://packagist.org/packages/dynamic/silverstripe-carousel)  
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-Dynamic-brightgreen)](https://github.com/sponsors/dynamic)
+
 ## Table of Contents
 
 - [Requirements](#requirements)
@@ -100,7 +102,7 @@ If you're not using Bootstrap or wish to customize the carousel's appearance:
    ```
 
 2. **Copy to Your Theme**  
-   Copy the `Carousel.ss` file to your theme’s directory, maintaining the folder structure:  
+   Copy the `Carousel.ss` file to your theme's directory, maintaining the folder structure:  
    ```
    themes/your-theme/templates/Dynamic/Carousel/Includes/Carousel.ss
    ```
