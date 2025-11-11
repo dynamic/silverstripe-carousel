@@ -29,6 +29,12 @@
             "Dynamic\\Carousel\\Test\\": "tests/"
         }
     },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/dynamic"
+        }
+    ],
     "extra": {
         "branch-alias": {
             "dev-main": "2.x-dev"
