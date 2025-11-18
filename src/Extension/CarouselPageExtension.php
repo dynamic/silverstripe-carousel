@@ -164,12 +164,11 @@ class CarouselPageExtension extends Extension
     /**
      * @return void
      */
-    public function onBeforeWrite()
+    protected function onBeforeWrite()
     {
         if (!$this->getOwner()->Interval || $this->getOwner()->Interval < 0) {
             $this->getOwner()->Interval = self::$defaults['Interval'];
         }
-        parent::onBeforeWrite();
     }
 
     /**

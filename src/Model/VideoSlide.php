@@ -4,8 +4,8 @@ namespace Dynamic\Carousel\Model;
 
 use SilverStripe\Assets\File;
 use SilverStripe\Forms\FieldList;
-use nathancox\EmbedField\Forms\EmbedField;
-use nathancox\EmbedField\Model\EmbedObject;
+use Fromholdio\EmbedField\Forms\EmbedField;
+use Fromholdio\EmbedField\Model\EmbedObject;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 
