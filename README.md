@@ -2,9 +2,10 @@
 
 A versatile carousel module for Silverstripe websites, featuring support for images and videos. The default template utilizes Bootstrap classes for seamless integration.
 
-[![CI](https://github.com/dynamic/silverstripe-carousel/workflows/CI/badge.svg)](https://github.com/dynamic/silverstripe-carousel/actions) [![Sponsor](https://img.shields.io/badge/Sponsor-Dynamic-brightgreen)](https://github.com/sponsors/dynamic)
+[![CI](https://github.com/dynamic/silverstripe-carousel/workflows/CI/badge.svg)](https://github.com/dynamic/silverstripe-carousel/actions)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/dynamic?label=Sponsors&logo=GitHub%20Sponsors&style=flat&color=ea4aaa)](https://github.com/sponsors/dynamic)
 
-[![Latest Stable Version](https://poser.pugx.org/dynamic/silverstripe-carousel/v/stable)](https://packagist.org/packages/dynamic/silverstripe-carousel) [![Total Downloads](https://poser.pugx.org/dynamic/silverstripe-carousel/downloads)](https://packagist.org/packages/dynamic/silverstripe-carousel) [![Latest Unstable Version](https://poser.pugx.org/dynamic/silverstripe-carousel/v/unstable)](https://packagist.org/packages/dynamic/silverstripe-carousel) [![License](https://poser.pugx.org/dynamic/silverstripe-carousel/license)](https://packagist.org/packages/dynamic/silverstripe-carousel)
+[![Latest Stable Version](https://poser.pugx.org/dynamic/silverstripe-carousel/v/stable)](https://packagist.org/packages/dynamic/silverstripe-carousel) [![Total Downloads](https://poser.pugx.org/dynamic/silverstripe-carousel/downloads)](https://packagist.org/packages/dynamic/silverstripe-carousel) [![License](https://poser.pugx.org/dynamic/silverstripe-carousel/license)](https://packagist.org/packages/dynamic/silverstripe-carousel)
 
 ## Table of Contents
 
@@ -24,7 +25,13 @@ A versatile carousel module for Silverstripe websites, featuring support for ima
 
 ## Requirements
 
-- Silverstripe CMS ^5.0
+- PHP: ^8.1
+- SilverStripe: ^6
+- SilverStripe LinkField: ^5
+- Jonom FocusPoint: ^6
+- Fromholdio EmbedField: ^5.1
+- Symbiote GridField Extensions: ^5
+- UncleCheese Display Logic: ^4
 - Bootstrap 5 (for default templates)
 
 ## Installation
@@ -40,6 +47,17 @@ Run a dev/build to regenerate the manifest:
 ```sh
 ./vendor/bin/sake dev/build
 ```
+
+## Features
+
+- **Multi-format Slides**: Support for both image and video slides in a single carousel
+- **Image Management**: Integration with Jonom FocusPoint for smart image cropping and focal points
+- **Video Embedding**: Embed videos from YouTube, Vimeo, and other platforms via EmbedField
+- **Link Integration**: Use SilverStripe LinkField for flexible slide linking (pages, URLs, files, email)
+- **Customizable Display**: Configure autoplay, interval timing, pause on hover, and show/hide indicators
+- **Bootstrap 5 Templates**: Default templates using Bootstrap 5 carousel component for responsive design
+- **Drag-to-Reorder**: Easy slide management with GridField OrderableRows
+- **Page Extension**: Simple integration via `CarouselPageExtension` for any page type
 
 ## Configuration
 
@@ -121,6 +139,20 @@ For more information on custom templates, refer to the [Silverstripe CMS Documen
 The Silverstripe Carousel module is used in other projects to extend functionality, such as:
 
 - [Silverstripe Elemental Carousel](https://github.com/dynamic/silverstripe-elemental-carousel) - Integrates carousel functionality with Silverstripe Elemental Blocks.
+
+## Upgrading from version 2
+
+Silverstripe Carousel 3.0 is compatible with SilverStripe 6. Key changes:
+
+- Updated to SilverStripe CMS 6
+- Requires PHP 8.1 or higher
+- Updated LinkField from ^4 to ^5
+- Updated FocusPoint from ^5 to ^6
+- Updated EmbedField: migrated from `nathancox/embedfield` to `fromholdio/silverstripe-embedfield` (SS6 compatible fork)
+- Updated GridField Extensions from ^4 to ^5
+- Updated Display Logic from ^3 to ^4
+
+See the [SilverStripe 6 Upgrade Guide](https://docs.silverstripe.org/en/6/) for more details.
 
 ## Maintainers
 
