@@ -14,7 +14,7 @@
         "silverstripe/linkfield": "^5",
         "silverstripe/recipe-cms": "^6",
         "symbiote/silverstripe-gridfieldextensions": "^5",
-        "unclecheese/display-logic": "^3.0"
+        "unclecheese/display-logic": "^4.0"
     },
     "require-dev": {
         "dnadesign/silverstripe-elemental": "^6",
@@ -38,7 +38,7 @@
     ],
     "extra": {
         "branch-alias": {
-            "dev-master": "3.0.x-dev"
+            "dev-main": "3.0.x-dev"
         }
     }
 }
