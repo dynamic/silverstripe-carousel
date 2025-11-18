@@ -4,8 +4,8 @@ namespace Dynamic\Carousel\Model;
 
 use SilverStripe\Assets\File;
 use SilverStripe\Forms\FieldList;
-use nathancox\EmbedField\Forms\EmbedField;
-use nathancox\EmbedField\Model\EmbedObject;
+use Fromholdio\EmbedField\Forms\EmbedField;
+use Fromholdio\EmbedField\Model\EmbedObject;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 
@@ -45,7 +45,6 @@ class VideoSlide extends Slide
      */
     private static $has_one = [
         'Video' => File::class,
-        // @phpstan-ignore class.notFound
         'EmbedVideo' => EmbedObject::class,
     ];
 
@@ -83,7 +82,6 @@ class VideoSlide extends Slide
             );
 
             // Embed video
-            // @phpstan-ignore class.notFound
             $embedVideo = Wrapper::create(EmbedField::create('EmbedVideoID', 'Embed video'));
 
             $fields->insertAfter(
