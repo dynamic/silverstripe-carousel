@@ -10,7 +10,7 @@
     "require": {
         "php": "^8.1",
         "fromholdio/silverstripe-embedfield": "^5.1",
-        "jonom/focuspoint": "^5",
+        "jonom/focuspoint": "^6",
         "silverstripe/linkfield": "^5",
         "silverstripe/recipe-cms": "^6",
         "symbiote/silverstripe-gridfieldextensions": "^5",
