@@ -45,7 +45,6 @@ class VideoSlide extends Slide
      */
     private static $has_one = [
         'Video' => File::class,
-        // @phpstan-ignore class.notFound
         'EmbedVideo' => EmbedObject::class,
     ];
 
@@ -83,7 +82,6 @@ class VideoSlide extends Slide
             );
 
             // Embed video
-            // @phpstan-ignore class.notFound
             $embedVideo = Wrapper::create(EmbedField::create('EmbedVideoID', 'Embed video'));
 
             $fields->insertAfter(
