@@ -5,7 +5,7 @@ namespace Dynamic\Carousel\Extension;
 use SilverStripe\View\SSViewer;
 use Dynamic\Carousel\Model\Slide;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\CompositeField;
@@ -29,7 +29,7 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * @property int $Interval
  * @method \SilverStripe\ORM\ManyManyThroughList|Slide[] Slides()
  */
-class CarouselPageExtension extends DataExtension
+class CarouselPageExtension extends Extension
 {
     /**
      * @var array
