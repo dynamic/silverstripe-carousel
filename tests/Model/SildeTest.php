@@ -3,6 +3,7 @@
 namespace Dynamic\Carousel\Test\Model;
 
 use Dynamic\Carousel\Model\Slide;
+use Dynamic\Carousel\Test\Stubs\TopTitleStubExtension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Dev\SapphireTest;
 
@@ -53,7 +54,10 @@ class SildeTest extends SapphireTest
         $slide->ShowTitle = false;
         $slide->Content = '';
 
-        $this->assertFalse($slide->ShowContent(), 'ShowContent() should be false when Title is set but ShowTitle is false');
+        $this->assertFalse(
+            $slide->ShowContent(),
+            'ShowContent() should be false when Title is set but ShowTitle is false'
+        );
     }
 
     public function testShowContentReturnsTrueWhenContentSet(): void
@@ -64,6 +68,41 @@ class SildeTest extends SapphireTest
         $slide->Content = '<p>Some content</p>';
 
         $this->assertTrue($slide->ShowContent(), 'ShowContent() should be true when Content is set');
+    }
+
+    /**
+     * hasField('TopTitle') guard — no crash when TopTitle field is absent.
+     */
+    public function testShowContentReturnsFalseWhenTopTitleAbsent(): void
+    {
+        $slide = Slide::create();
+        $slide->Title = '';
+        $slide->ShowTitle = false;
+        $slide->Content = '';
+
+        $this->assertFalse(
+            $slide->ShowContent(),
+            'ShowContent() should return false (not throw) when TopTitle field is absent'
+        );
+    }
+
+    public function testShowContentReturnsTrueWhenTopTitleSet(): void
+    {
+        Slide::add_extension(TopTitleStubExtension::class);
+        try {
+            $slide = Slide::create();
+            $slide->TopTitle = 'Top Title Text';
+            $slide->Title = '';
+            $slide->ShowTitle = false;
+            $slide->Content = '';
+
+            $this->assertTrue(
+                $slide->ShowContent(),
+                'ShowContent() should be true when only TopTitle is set'
+            );
+        } finally {
+            Slide::remove_extension(TopTitleStubExtension::class);
+        }
     }
 
     /**
