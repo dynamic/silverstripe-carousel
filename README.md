@@ -2,10 +2,12 @@
 
 A versatile carousel module for Silverstripe websites, featuring support for images and videos. The default template utilizes Bootstrap classes for seamless integration.
 
-[![CI](https://github.com/dynamic/silverstripe-carousel/workflows/CI/badge.svg)](https://github.com/dynamic/silverstripe-carousel/actions)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/dynamic?label=Sponsors&logo=GitHub%20Sponsors&style=flat&color=ea4aaa)](https://github.com/sponsors/dynamic)
+[![CI](https://github.com/dynamic/silverstripe-carousel/actions/workflows/ci.yml/badge.svg)](https://github.com/dynamic/silverstripe-carousel/actions/workflows/ci.yml) [![Sponsors](https://img.shields.io/badge/GitHub-Sponsors-ff69b4?logo=github)](https://github.com/sponsors/dynamic)
 
-[![Latest Stable Version](https://poser.pugx.org/dynamic/silverstripe-carousel/v/stable)](https://packagist.org/packages/dynamic/silverstripe-carousel) [![Total Downloads](https://poser.pugx.org/dynamic/silverstripe-carousel/downloads)](https://packagist.org/packages/dynamic/silverstripe-carousel) [![License](https://poser.pugx.org/dynamic/silverstripe-carousel/license)](https://packagist.org/packages/dynamic/silverstripe-carousel)
+[![Latest Stable Version](https://poser.pugx.org/dynamic/silverstripe-carousel/v/stable)](https://packagist.org/packages/dynamic/silverstripe-carousel)
+[![Total Downloads](https://poser.pugx.org/dynamic/silverstripe-carousel/downloads)](https://packagist.org/packages/dynamic/silverstripe-carousel)
+[![Latest Unstable Version](https://poser.pugx.org/dynamic/silverstripe-carousel/v/unstable)](https://packagist.org/packages/dynamic/silverstripe-carousel)
+[![License](https://poser.pugx.org/dynamic/silverstripe-carousel/license)](https://packagist.org/packages/dynamic/silverstripe-carousel)
 
 ## Table of Contents
 
@@ -25,27 +27,18 @@ A versatile carousel module for Silverstripe websites, featuring support for ima
 
 ## Requirements
 
-- PHP: ^8.1
-- SilverStripe: ^6
-- SilverStripe LinkField: ^5
-- Jonom FocusPoint: ^6
-- Fromholdio EmbedField: ^5.1
-- Symbiote GridField Extensions: ^5
-- UncleCheese Display Logic: ^4
-- Bootstrap 5 (for default templates)
+- PHP: ^8.3
+- silverstripe/recipe-cms: ^6
+- fromholdio/silverstripe-embedfield: ^5.1
+- jonom/focuspoint: ^6
+- silverstripe/linkfield: ^5
+- symbiote/silverstripe-gridfieldextensions: ^5
+- unclecheese/display-logic: ^4.0
 
 ## Installation
 
-Install via Composer:
-
 ```sh
 composer require dynamic/silverstripe-carousel
-```
-
-Run a dev/build to regenerate the manifest:
-
-```sh
-./vendor/bin/sake dev/build
 ```
 
 ## Features
@@ -92,7 +85,7 @@ The module supports two types of content:
 
 To add these:
 
-1. In the CMS, navigate to the page where you've enabled the carousel.
+1. In the CMS, navigate to the page where you have enabled the carousel.
 2. Click on the "Carousel" tab.
 3. Use the "Add Slide" button to add either an Image or Video.
 4. For Images:
@@ -108,7 +101,7 @@ Repeat these steps to add multiple images or videos as needed.
 
 ### Creating Custom Templates
 
-If you're not using Bootstrap or wish to customize the carousel's appearance:
+If you are not using Bootstrap or wish to customize the carousel appearance:
 
 1. **Locate the Default Template**  
    The default template is located at:  
@@ -117,7 +110,7 @@ If you're not using Bootstrap or wish to customize the carousel's appearance:
    ```
 
 2. **Copy to Your Theme**  
-   Copy the `Carousel.ss` file to your theme's directory, maintaining the folder structure:  
+   Copy the `Carousel.ss` file to your theme directory, maintaining the folder structure:  
    ```
    themes/your-theme/templates/Dynamic/Carousel/Includes/Carousel.ss
    ```
@@ -130,9 +123,9 @@ If you're not using Bootstrap or wish to customize the carousel's appearance:
 
 4. **Include Necessary Assets**  
    Ensure that any required JavaScript or CSS for your custom carousel implementation is included in your project.  
-   If you're using a different frontend framework, include its assets accordingly.
+   If you are using a different frontend framework, include its assets accordingly.
 
-For more information on custom templates, refer to the [Silverstripe CMS Documentation](https://docs.silverstripe.org/en/5/developer_guides/templates/).
+For more information on custom templates, refer to the [Silverstripe CMS Documentation](https://docs.silverstripe.org/en/6/developer_guides/templates/).
 
 ## Other Modules Using Silverstripe Carousel
 
@@ -145,7 +138,7 @@ The Silverstripe Carousel module is used in other projects to extend functionali
 Silverstripe Carousel 3.0 is compatible with SilverStripe 6. Key changes:
 
 - Updated to SilverStripe CMS 6
-- Requires PHP 8.1 or higher
+- Requires PHP 8.3 or higher
 - Updated LinkField from ^4 to ^5
 - Updated FocusPoint from ^5 to ^6
 - Updated EmbedField: migrated from `nathancox/embedfield` to `fromholdio/silverstripe-embedfield` (SS6 compatible fork)
@@ -156,30 +149,24 @@ See the [SilverStripe 6 Upgrade Guide](https://docs.silverstripe.org/en/6/) for 
 
 ## Maintainers
 
-- [Dynamic](http://www.dynamicagency.com) (<dev@dynamicagency.com>)
+ *  [Dynamic](https://www.dynamicagency.com) (<dev@dynamicagency.com>)
 
 ## Bugtracker
 
-Bugs are tracked in the issues section of this repository. Before submitting an issue, please review existing issues to ensure yours is unique.
+Bugs are tracked in the issues section of this repository. Before submitting an issue please read over existing issues to ensure yours is unique.
 
-If the issue appears to be new:
+If the issue does look like a new bug:
 
-- Create a new issue.
-- Describe the steps required to reproduce your issue and the expected outcome. Unit tests, screenshots, and screencasts can help here.
-- Provide details about your environment:
-  - Silverstripe version
-  - Browser and version
-  - PHP version
-  - Operating system
-  - Any installed Silverstripe modules
+ - Create a new issue
+ - Describe the steps required to reproduce your issue, and the expected outcome. Unit tests, screenshots and screencasts can help here.
+ - Describe your environment as detailed as possible: SilverStripe version, Browser, PHP version, Operating System, any installed SilverStripe modules.
 
-**Security Issues:**  
-Please report security issues to the module maintainers directly. Avoid filing security issues in the bugtracker.
+Please report security issues to the module maintainers directly. Please don't file security issues in the bugtracker.
 
 ## Development and Contribution
 
-We welcome contributions! Please ensure you raise a pull request and discuss with the module maintainers.
+If you would like to make contributions to the module please ensure you raise a pull request and discuss with the module maintainers.
 
 ## License
 
-This module is licensed under the BSD-3-Clause License. See the [LICENSE](LICENSE.md) file for details.
+See [License](LICENSE.md)
