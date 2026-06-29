@@ -1,0 +1,55 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^@method annotation ''\(\\SilverStripe\\ORM\\ManyManyThroughList \| Slide\[\]\) Slides\(\)'' should be ''ManyManyList\<Slide\> Slides\(\)''\.$#'
+			identifier: annotations.method
+			count: 1
+			path: src/Extension/CarouselPageExtension.php
+
+		-
+			message: '#^Can''t use keyword ''self''\. Use ''CarouselPageExtension'' instead\.$#'
+			identifier: keyword.self
+			count: 2
+			path: src/Extension/CarouselPageExtension.php
+
+		-
+			message: '#^Unsafe access to configuration property Dynamic\\Carousel\\Extension\\CarouselPageExtension\:\:\$defaults through self\:\:\. Use self\:\:config\(\)\-\>get\(''defaults''\) instead\.$#'
+			identifier: silverstan.configurationProperty.unsafe
+			count: 2
+			path: src/Extension/CarouselPageExtension.php
+
+		-
+			message: '#^Use Symbiote\\GridFieldExtensions\\GridFieldAddExistingSearchButton\:\:create\(\) instead of new Symbiote\\GridFieldExtensions\\GridFieldAddExistingSearchButton\(\)\.$#'
+			identifier: silverstan.injectable.useCreate
+			count: 1
+			path: src/Extension/CarouselPageExtension.php
+
+		-
+			message: '#^Use Symbiote\\GridFieldExtensions\\GridFieldOrderableRows\:\:create\(\) instead of new Symbiote\\GridFieldExtensions\\GridFieldOrderableRows\(\)\.$#'
+			identifier: silverstan.injectable.useCreate
+			count: 1
+			path: src/Extension/CarouselPageExtension.php
+
+		-
+			message: '#^@method annotation ''Image ImageMobile\(\)'' is missing or has an invalid syntax\.$#'
+			identifier: annotations.method
+			count: 1
+			path: src/Model/ImageSlide.php
+
+		-
+			message: '#^@method annotation ''Link ElementLink\(\)'' is missing or has an invalid syntax\.$#'
+			identifier: annotations.method
+			count: 1
+			path: src/Model/ImageSlide.php
+
+		-
+			message: '#^@method annotation ''\\SilverStripe\\ORM\\ManyManyThroughList Parents\(\)'' isn''t expected and should be removed\.$#'
+			identifier: annotations.method
+			count: 1
+			path: src/Model/Slide.php
+
+		-
+			message: '#^@method annotation ''EmbedObject EmbedVideo\(\)'' is missing or has an invalid syntax\.$#'
+			identifier: annotations.method
+			count: 1
+			path: src/Model/VideoSlide.php
