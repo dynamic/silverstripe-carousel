@@ -123,13 +123,27 @@ class Slide extends DataObject
     }
 
     /**
-     * ShowCaption
+     * Returns true when the slide has any overlay content to display.
+     * Gates the carousel-caption overlay block in templates (TopTitle, Title, Content, Link).
+     *
+     * Note: "TopTitle" is added via CustomStylesExtension (wired by the consuming recipe/app
+     * YAML). We probe it defensively with hasField() so the carousel module itself stays
+     * free of a hard dependency on essentials-tools.
+     */
+    public function ShowContent(): bool
+    {
+        $owner = $this->getOwner();
+        $hasTopTitle = $owner->hasField('TopTitle') && (bool) $owner->TopTitle;
+
+        return $hasTopTitle || ($owner->Title && $owner->ShowTitle) || (bool) $owner->Content;
+    }
+
+    /**
+     * @deprecated Use ShowContent() instead. Kept for any unknown third-party consumers.
      */
     public function ShowCaption(): bool
     {
-        $owner = $this->getOwner();
-
-        return (($owner->Title && $owner->ShowTitle) || $owner->SubTitle || $owner->Content);
+        return $this->ShowContent();
     }
 
     /**
