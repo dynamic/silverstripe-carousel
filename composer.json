@@ -35,10 +35,5 @@
             "type": "github",
             "url": "https://github.com/sponsors/dynamic"
         }
-    ],
-    "extra": {
-        "branch-alias": {
-            "dev-main": "3.0.x-dev"
-        }
-    }
+    ]
 }
