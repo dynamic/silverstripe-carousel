@@ -133,6 +133,16 @@ The Silverstripe Carousel module is used in other projects to extend functionali
 
 - [Silverstripe Elemental Carousel](https://github.com/dynamic/silverstripe-elemental-carousel) - Integrates carousel functionality with Silverstripe Elemental Blocks.
 
+## Upgrading to 3.1
+
+`CarouselPageExtension::$cascade_deletes` is now empty. Slides can be shared between carousels, so archiving or deleting a carousel no longer deletes its slides; a slide no carousel uses stays in the database, like a File. To restore the old behaviour, add it back on the class that carries the extension:
+
+```yaml
+Dynamic\Elements\Carousel\Elements\ElementCarousel:
+  cascade_deletes:
+    - Slides
+```
+
 ## Upgrading from version 2
 
 Silverstripe Carousel 3.0 is compatible with SilverStripe 6. Key changes:

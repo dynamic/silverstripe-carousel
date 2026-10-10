@@ -56,6 +56,25 @@ class ImageSlide extends Slide
     ];
 
     /**
+     * Duplicating a slide forks its Link instead of copying the ElementLinkID foreign key,
+     * so the copy and the original do not share (and co-edit) one Link row. `owns` does
+     * not cover this: the duplicate fallback in RecursivePublishable skips has_one.
+     *
+     * Image and ImageMobile are left out on purpose: Files stay shared, not cloned.
+     * The forked Link keeps the original slide as its OwnerID, so Link::Owner() resolves
+     * to null for it and Link::canPerformAction() falls back to ImageSlide::canCreate().
+     *
+     * Deliberately no cascade_deletes: slides duplicated before this fix still share Link
+     * rows, so deleting one slide's link would break the others.
+     *
+     * @var array
+     * @config
+     */
+    private static $cascade_duplicates = [
+        'ElementLink',
+    ];
+
+    /**
      * @var string
      * @config
      */
