@@ -23,6 +23,7 @@ class CarouselSharedSlidesTest extends SapphireTest
 
     protected static $required_extensions = [
         TestCarousel::class => [
+            Versioned::class,
             CarouselPageExtension::class,
         ],
     ];
