@@ -92,6 +92,27 @@ class CarouselSharedSlidesTest extends SapphireTest
     }
 
     /**
+     * The contract after #55: a carousel never deletes its slides, even unshared ones. An
+     * unreferenced Slide stays in the database like a File.
+     */
+    public function testArchivingKeepsAnUnsharedSlide(): void
+    {
+        $slide = ImageSlide::create();
+        $slide->Title = 'Only slide';
+        $slide->write();
+
+        $carousel = TestCarousel::create();
+        $carousel->Title = 'Lone carousel';
+        $carousel->write();
+        $carousel->Slides()->add($slide, ['SortOrder' => 1]);
+        $carousel->publishRecursive();
+
+        $carousel->doArchive();
+
+        $this->assertSlideOnBothStages($slide->ID);
+    }
+
+    /**
      * cascade_duplicates on a many_many re-links the same Slide rows rather than cloning
      * them, so every duplicated carousel shares its slides with the original. Archiving
      * the original must leave the copy's slides intact.

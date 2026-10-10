@@ -27,7 +27,7 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * @property string $Transitions
  * @property string $Autoplay
  * @property int $Interval
- * @method \SilverStripe\ORM\ManyManyThroughList|Slide[] Slides()
+ * @method \SilverStripe\ORM\ManyManyList|Slide[] Slides()
  */
 class CarouselPageExtension extends Extension
 {
