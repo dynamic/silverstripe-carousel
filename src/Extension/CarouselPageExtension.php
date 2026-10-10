@@ -27,7 +27,7 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * @property string $Transitions
  * @property string $Autoplay
  * @property int $Interval
- * @method \SilverStripe\ORM\ManyManyThroughList|Slide[] Slides()
+ * @method \SilverStripe\ORM\ManyManyList|Slide[] Slides()
  */
 class CarouselPageExtension extends Extension
 {
@@ -78,12 +78,16 @@ class CarouselPageExtension extends Extension
     ];
 
     /**
+     * Slides are not cascade-deleted. They are shared between carousels: the CMS offers
+     * "add existing", and cascade_duplicates on a many_many re-links the same Slide rows
+     * rather than cloning them. Deleting or archiving one carousel used to delete Slides
+     * other carousels still show (#55). A Slide no carousel references stays in the
+     * database, like a File.
+     *
      * @var array
      * @config
      */
-    private static array $cascade_deletes = [
-        'Slides',
-    ];
+    private static array $cascade_deletes = [];
 
     /**
      * @var array
