@@ -7,6 +7,7 @@ use Dynamic\Carousel\Model\ImageSlide;
 use Dynamic\Carousel\Model\Slide;
 use Dynamic\Carousel\Task\UnusedSlideCleanupTask;
 use Dynamic\Carousel\Test\Test\Model\TestCarousel;
+use ReflectionMethod;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\PolyExecution\PolyOutput;
 use SilverStripe\Versioned\Versioned;
@@ -238,25 +239,7 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
         $slide = $this->createSlide('Slide behind an unreadable owner');
         $this->createCarousel('Readable carousel', [$slide], true);
 
-        $task = new class extends UnusedSlideCleanupTask {
-            protected function relations(): array
-            {
-                // The real join table and fields, but an owner class that resolves to nothing, so
-                // reading its rows throws inside ownerIDsOnAnyStage() exactly as a broken or
-                // unmigrated owner class would in a real project.
-                $broken = [];
-
-                foreach (parent::relations() as $relation) {
-                    $broken['unreadable.' . $relation['join']] = array_merge($relation, [
-                        'parentClass' => 'Dynamic\\Carousel\\Test\\Task\\UnreadableCarouselOwner',
-                    ]);
-                }
-
-                return $broken;
-            }
-        };
-
-        [$dryCode, $dryOutput] = $this->runTask(false, $task);
+        [$dryCode, $dryOutput] = $this->runTask(false, $this->unreadableRelationTask());
 
         $this->assertSame(0, $dryCode);
         $this->assertStringContainsString('WARNING: could not read owners of', $dryOutput);
@@ -267,7 +250,8 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
             'An owner that could not be read makes its slides look unused'
         );
 
-        [$code, $output] = $this->runTask(true, $task);
+        // A fresh instance: the refusal must be this run's, not one inherited from the dry run.
+        [$code, $output] = $this->runTask(true, $this->unreadableRelationTask());
 
         $this->assertSame(1, $code);
         $this->assertStringContainsString('Refusing to archive', $output);
@@ -285,29 +269,56 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
         $slide = $this->createSlide('Slide a carousel still lists');
         $this->createCarousel('Carousel that could not be read', [$slide], true);
 
-        $task = new class extends UnusedSlideCleanupTask {
-            protected function ownerIDsOnAnyStage(string $class): array
-            {
-                // Exactly what ownerIDsOnAnyStage()'s own catch leaves behind when an owner cannot
-                // be read: one reportable line, and no IDs to reference.
-                $this->skipped[] = sprintf('could not read owners of %s: simulated', $class);
-
-                return [];
-            }
-        };
-
-        [$dryCode, $dryOutput] = $this->runTask(false, $task);
+        [$dryCode, $dryOutput] = $this->runTask(false, $this->unreadableOwnerRowsTask());
 
         $this->assertSame(0, $dryCode);
         $this->assertStringContainsString('WARNING: could not read owners of', $dryOutput);
         $this->assertStringNotContainsString('Refusing to archive', $dryOutput);
 
-        [$code, $output] = $this->runTask(true, $task);
+        [$code, $output] = $this->runTask(true, $this->unreadableOwnerRowsTask());
 
         $this->assertSame(1, $code);
         $this->assertStringContainsString('Refusing to archive', $output);
         $this->assertStringNotContainsString('Archived', $output);
         $this->assertSlideOnBothStages($slide->ID, 'A slide a carousel still lists must survive an aborted run');
+    }
+
+    /**
+     * A relation naming an owner class that resolves to nothing, so reading its rows throws inside
+     * ownerIDsOnAnyStage() exactly as a broken or unmigrated owner class does in a real project.
+     */
+    private function unreadableRelationTask(): UnusedSlideCleanupTask
+    {
+        return new class extends UnusedSlideCleanupTask {
+            protected function relations(): array
+            {
+                $broken = [];
+
+                foreach (parent::relations() as $relation) {
+                    $broken['unreadable.' . $relation['join']] = array_merge($relation, [
+                        'parentClass' => 'Dynamic\Carousel\Test\Task\UnreadableCarouselOwner',
+                    ]);
+                }
+
+                return $broken;
+            }
+        };
+    }
+
+    /**
+     * An owner that resolves but whose rows cannot be read: exactly the state
+     * ownerIDsOnAnyStage()'s own catch leaves behind, one reportable line and no IDs.
+     */
+    private function unreadableOwnerRowsTask(): UnusedSlideCleanupTask
+    {
+        return new class extends UnusedSlideCleanupTask {
+            protected function ownerIDsOnAnyStage(string $class): array
+            {
+                $this->skipped[] = sprintf('could not read owners of %s: simulated', $class);
+
+                return [];
+            }
+        };
     }
 
     /**

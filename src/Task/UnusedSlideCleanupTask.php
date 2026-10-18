@@ -312,7 +312,11 @@ class UnusedSlideCleanupTask extends BuildTask
         try {
             $table = DataObject::getSchema()->baseDataTable($class);
 
-            if (DataObject::singleton($class)->hasExtension(Versioned::class)) {
+            // Statically, not through singleton(): manyManyComponent() reports the class the
+            // extension was applied to, and a project can apply it to an abstract base whose
+            // concrete subclasses own all the rows. singleton() cannot build that base, and reading
+            // an owner is supposed to be safe on the class name alone.
+            if (DataObject::has_extension($class, Versioned::class)) {
                 $stages = [Versioned::DRAFT => $table, Versioned::LIVE => $table . '_Live'];
 
                 foreach ($stages as $stage => $stageTable) {
@@ -354,8 +358,9 @@ class UnusedSlideCleanupTask extends BuildTask
     }
 
     /**
-     * The Slides on each stage that no carousel references, listed as they are found and keyed by
-     * Slide ID so a slide sitting on both stages is reported and handled once.
+     * The Slides on each stage that no carousel references. Each stage names its own slides, so a
+     * slide on both is listed twice - once per stage, which is what the issue asks for - while the
+     * returned set is keyed by Slide ID so it is archived once.
      *
      * @param array<int,true> $referenced
      * @param PolyOutput $output
