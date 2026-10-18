@@ -119,7 +119,7 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
         $this->assertSame(0, $code);
         $this->assertSame([$orphan->ID], $this->listedSlideIDs($output));
         $this->assertStringContainsString('Draft stage: 1 unused slide found.', $output);
-        $this->assertStringContainsString('Live stage: 0 unused slides.', $output);
+        $this->assertStringContainsString('Live stage: 0 unused slides found.', $output);
 
         [$code, $output] = $this->runTask(true);
 
@@ -223,6 +223,91 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
         $this->assertStringContainsString('so there is nothing to scan.', $output);
         $this->assertStringNotContainsString('Archived', $output);
         $this->assertSlideOnBothStages($orphan->ID);
+    }
+
+    /**
+     * An owner this run could not read contributes no references, which makes the slides behind it
+     * look unused. A dry run can still print that list and warn about it; an archive pass must not
+     * act on a reference set it knows to be incomplete, and must not report success either.
+     *
+     * Here the unreadable owner is a relation naming a class that cannot be resolved at all, so the
+     * failure is raised for real, inside ownerIDsOnAnyStage().
+     */
+    public function testUnreadableOwnerRelationIsReportedAndStopsAnArchivePass(): void
+    {
+        $slide = $this->createSlide('Slide behind an unreadable owner');
+        $this->createCarousel('Readable carousel', [$slide], true);
+
+        $task = new class extends UnusedSlideCleanupTask {
+            protected function relations(): array
+            {
+                // The real join table and fields, but an owner class that resolves to nothing, so
+                // reading its rows throws inside ownerIDsOnAnyStage() exactly as a broken or
+                // unmigrated owner class would in a real project.
+                $broken = [];
+
+                foreach (parent::relations() as $relation) {
+                    $broken['unreadable.' . $relation['join']] = array_merge($relation, [
+                        'parentClass' => 'Dynamic\\Carousel\\Test\\Task\\UnreadableCarouselOwner',
+                    ]);
+                }
+
+                return $broken;
+            }
+        };
+
+        [$dryCode, $dryOutput] = $this->runTask(false, $task);
+
+        $this->assertSame(0, $dryCode);
+        $this->assertStringContainsString('WARNING: could not read owners of', $dryOutput);
+        $this->assertStringNotContainsString('Refusing to archive', $dryOutput);
+        $this->assertSame(
+            [$slide->ID],
+            $this->listedSlideIDs($dryOutput),
+            'An owner that could not be read makes its slides look unused'
+        );
+
+        [$code, $output] = $this->runTask(true, $task);
+
+        $this->assertSame(1, $code);
+        $this->assertStringContainsString('Refusing to archive', $output);
+        $this->assertStringNotContainsString('Archived', $output);
+        $this->assertSlideOnBothStages($slide->ID, 'An incomplete scan must not archive a slide in use');
+    }
+
+    /**
+     * The same refusal for an owner that resolves but cannot be read at all (a missing table, a
+     * connection blip): the double leaves the task in exactly the state ownerIDsOnAnyStage()'s
+     * catch leaves it in, and the slide its carousel still lists has to survive the run.
+     */
+    public function testArchiveRefusesWhenAnOwnerCouldNotBeRead(): void
+    {
+        $slide = $this->createSlide('Slide a carousel still lists');
+        $this->createCarousel('Carousel that could not be read', [$slide], true);
+
+        $task = new class extends UnusedSlideCleanupTask {
+            protected function ownerIDsOnAnyStage(string $class): array
+            {
+                // Exactly what ownerIDsOnAnyStage()'s own catch leaves behind when an owner cannot
+                // be read: one reportable line, and no IDs to reference.
+                $this->skipped[] = sprintf('could not read owners of %s: simulated', $class);
+
+                return [];
+            }
+        };
+
+        [$dryCode, $dryOutput] = $this->runTask(false, $task);
+
+        $this->assertSame(0, $dryCode);
+        $this->assertStringContainsString('WARNING: could not read owners of', $dryOutput);
+        $this->assertStringNotContainsString('Refusing to archive', $dryOutput);
+
+        [$code, $output] = $this->runTask(true, $task);
+
+        $this->assertSame(1, $code);
+        $this->assertStringContainsString('Refusing to archive', $output);
+        $this->assertStringNotContainsString('Archived', $output);
+        $this->assertSlideOnBothStages($slide->ID, 'A slide a carousel still lists must survive an aborted run');
     }
 
     /**

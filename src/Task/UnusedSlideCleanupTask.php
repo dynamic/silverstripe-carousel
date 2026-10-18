@@ -4,6 +4,7 @@ namespace Dynamic\Carousel\Task;
 
 use Dynamic\Carousel\Extension\CarouselPageExtension;
 use Dynamic\Carousel\Model\Slide;
+use ReflectionClass;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DataObject;
@@ -45,6 +46,9 @@ use Throwable;
  * Safety:
  *
  * - Dry run by default. Without --archive this task only reads, and says so.
+ * - A half-read scan never writes. A carousel owner that cannot be inspected leaves its slides out
+ *   of the reference set, so they look unused: --archive refuses to act on an incomplete set and
+ *   exits non-zero. Listing is still safe, so a dry run only warns.
  * - Archive, never delete. Versioned::doArchive() drops the row from draft and live and keeps a
  *   deleted version, so an archiving mistake is recoverable from the Archived stage (or
  *   through _Versions) rather than being data loss.
@@ -81,11 +85,18 @@ class UnusedSlideCleanupTask extends BuildTask
     protected ?array $cachedRelations = null;
 
     /**
-     * Classes this run could not inspect, each as one reportable line.
+     * Parts of the scan that failed, each as one reportable line. Kept for the whole run rather
+     * than emptied as it is reported, because its emptiness is what tells --archive whether the
+     * reference set can be trusted.
      *
      * @var array<int,string>
      */
     protected array $skipped = [];
+
+    /**
+     * How many of $skipped have already been printed, so a second flush reports only the new lines.
+     */
+    protected int $reportedSkipped = 0;
 
     /**
      * @return array<int,InputOption>
@@ -155,6 +166,19 @@ class UnusedSlideCleanupTask extends BuildTask
                 return Command::SUCCESS;
             }
 
+            if ($this->scanIsIncomplete()) {
+                // The listing above is what a dry run should print, but it was built from reference
+                // data this run could not finish reading: a slide held by an owner that could not
+                // be inspected looks unused here and is not. Refuse the write half.
+                $output->writeln(
+                    'Refusing to archive: the reference set above is incomplete because a carousel '
+                    . 'owner could not be read. Fix the warnings above and re-run.'
+                );
+                $this->flushSkipped($output);
+
+                return Command::FAILURE;
+            }
+
             $code = $this->archiveUnused($unused, $output);
             $this->flushSkipped($output);
 
@@ -183,8 +207,14 @@ class UnusedSlideCleanupTask extends BuildTask
 
         foreach (ClassInfo::subclassesFor(DataObject::class) as $class) {
             try {
-                // An abstract or otherwise unconstructable DataObject can own no rows, so it can
-                // contribute no join table worth scanning.
+                // An abstract class owns no rows, so it contributes no join table worth scanning.
+                // Ruled out here rather than through singleton(), which cannot construct one and so
+                // would report it as an owner this run could not read - and after the refusal below,
+                // an unreadable owner now stops an archive pass.
+                if ((new ReflectionClass($class))->isAbstract()) {
+                    continue;
+                }
+
                 if (!DataObject::singleton($class)->hasExtension(CarouselPageExtension::class)) {
                     continue;
                 }
@@ -277,10 +307,11 @@ class UnusedSlideCleanupTask extends BuildTask
      */
     protected function ownerIDsOnAnyStage(string $class): array
     {
-        $table = DataObject::getSchema()->baseDataTable($class);
         $ids = [];
 
         try {
+            $table = DataObject::getSchema()->baseDataTable($class);
+
             if (DataObject::singleton($class)->hasExtension(Versioned::class)) {
                 $stages = [Versioned::DRAFT => $table, Versioned::LIVE => $table . '_Live'];
 
@@ -296,21 +327,30 @@ class UnusedSlideCleanupTask extends BuildTask
 
                 return $ids;
             }
+
+            if (!DB::get_schema()->hasTable($table)) {
+                return [];
+            }
+
+            foreach (DataObject::get($class)->column('ID') as $id) {
+                $ids[(int) $id] = true;
+            }
+
+            return $ids;
         } catch (Throwable $e) {
             $this->skipped[] = sprintf('could not read owners of %s: %s', $class, $e->getMessage());
 
             return [];
         }
+    }
 
-        if (!DB::get_schema()->hasTable($table)) {
-            return [];
-        }
-
-        foreach (DataObject::get($class)->column('ID') as $id) {
-            $ids[(int) $id] = true;
-        }
-
-        return $ids;
+    /**
+     * Whether any carousel owner went unread this run. That is what makes an archive pass unsafe:
+     * the owner's slides are missing from the reference set, so they look unused.
+     */
+    protected function scanIsIncomplete(): bool
+    {
+        return $this->skipped !== [];
     }
 
     /**
@@ -331,10 +371,10 @@ class UnusedSlideCleanupTask extends BuildTask
             sort($orphanIDs);
 
             $output->writeln(sprintf(
-                '%s stage: %d unused slide%s.',
+                '%s stage: %d unused slide%s found.',
                 $this->stageLabel($stage),
                 count($orphanIDs),
-                count($orphanIDs) === 1 ? ' found' : 's'
+                count($orphanIDs) === 1 ? '' : 's'
             ));
 
             foreach ($orphanIDs as $orphanID) {
@@ -438,11 +478,11 @@ class UnusedSlideCleanupTask extends BuildTask
      */
     protected function flushSkipped(PolyOutput $output): void
     {
-        foreach ($this->skipped as $skipped) {
+        foreach (array_slice($this->skipped, $this->reportedSkipped) as $skipped) {
             $output->writeln('WARNING: ' . $skipped);
         }
 
-        $this->skipped = [];
+        $this->reportedSkipped = count($this->skipped);
     }
 
     /**
