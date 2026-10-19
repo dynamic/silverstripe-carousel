@@ -7,9 +7,11 @@ use Dynamic\Carousel\Model\ImageSlide;
 use Dynamic\Carousel\Model\Slide;
 use Dynamic\Carousel\Task\UnusedSlideCleanupTask;
 use Dynamic\Carousel\Test\Stubs\HiddenOwnerReadStubExtension;
+use Dynamic\Carousel\Test\Stubs\UnbuiltCarouselOwnerStub;
 use Dynamic\Carousel\Test\Test\Model\TestCarousel;
 use ReflectionMethod;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\PolyExecution\PolyOutput;
 use SilverStripe\Versioned\Versioned;
@@ -29,6 +31,8 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
 
     protected static $extra_dataobjects = [
         TestCarousel::class,
+        // Built here so the missing-owner-table test has a table to drop.
+        UnbuiltCarouselOwnerStub::class,
     ];
 
     protected static $required_extensions = [
@@ -407,9 +411,11 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
     }
 
     /**
-     * The same refusal for an owner that resolves but cannot be read at all (a missing table, a
-     * connection blip): the double leaves the task in exactly the state ownerIDsOnAnyStage()'s
-     * catch leaves it in, and the slide its carousel still lists has to survive the run.
+     * The same refusal for an owner that resolves but whose rows cannot be read at all (a broken
+     * connection, a query that dies part way): the double leaves the task in exactly the state
+     * ownerIDsOnAnyStage()'s catch leaves it in, and the slide its carousel still lists has to
+     * survive the run. A missing owner table is a different shape of unreadable, and has its own
+     * test below because it never reaches that catch.
      */
     public function testArchiveRefusesWhenAnOwnerCouldNotBeRead(): void
     {
@@ -464,6 +470,86 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
                 $this->skipped[] = sprintf('could not read owners of %s: simulated', $class);
 
                 return [];
+            }
+        };
+    }
+
+    /**
+     * An owner class that resolves fine but whose stage table is not there - a renamed $table_name or
+     * a half-applied /dev/build. Its rows cannot be read, so nothing about this owner is known, and an
+     * empty result read as "no carousels" would discard every join row it owns: --archive has to
+     * refuse the way it does for any other unreadable owner rather than archive that owner's slides.
+     * This goes through the real ownerIDsOnAnyStage() rather than handing the task a pre-filled
+     * $skipped, and reaches the missing table with guarded inline DDL: the test database builds a
+     * table for every class in the manifest, so this is the only way to stand one up without it.
+     */
+    public function testOwnerWithNoTableIsReportedAndStopsAnArchivePass(): void
+    {
+        $slide = $this->createSlide('Slide behind an owner with no table');
+        $this->createCarousel('Carousel whose owner table is missing', [$slide], true);
+
+        $table = (string)DataObject::getSchema()->baseDataTable(UnbuiltCarouselOwnerStub::class);
+
+        // Guarded, as every inline schema statement in a test suite should be: this one drops a
+        // table, so it runs only against the test database and only on the table this stub owns,
+        // and the table is rebuilt in the finally so no later test sees it gone.
+        $this->assertSame(
+            'Carousel_StubOwnerWithoutTable',
+            $table,
+            'Setup: the stub must own exactly the table this test drops'
+        );
+        $this->assertTrue(
+            DB::get_schema()->hasTable($table),
+            'Setup: the test database must have built the stub table before this test drops it'
+        );
+
+        DB::query('DROP TABLE "Carousel_StubOwnerWithoutTable"');
+
+        try {
+            $this->assertFalse(DB::get_schema()->hasTable($table), 'Setup: the owner table must be gone');
+
+            [$dryCode, $dryOutput] = $this->runTask(false, $this->ownerWithNoTableTask());
+
+            $this->assertSame(0, $dryCode);
+            $this->assertStringContainsString(
+                'WARNING: could not read owners of ' . UnbuiltCarouselOwnerStub::class
+                    . ': the Carousel_StubOwnerWithoutTable table',
+                $dryOutput
+            );
+            $this->assertStringNotContainsString('Refusing to archive', $dryOutput);
+
+            [$code, $output] = $this->runTask(true, $this->ownerWithNoTableTask());
+
+            $this->assertSame(1, $code);
+            $this->assertStringContainsString('Refusing to archive', $output);
+            $this->assertStringNotContainsString('Archived', $output);
+            $this->assertSlideOnBothStages(
+                $slide->ID,
+                'An owner whose table is gone must not cost a slide its row'
+            );
+        } finally {
+            DB::get_schema()->createTable($table, ['ID' => 'Int']);
+        }
+    }
+
+    /**
+     * A relation naming an owner class that resolves fine but whose stage table this run cannot find -
+     * a renamed $table_name or a half-applied /dev/build, which is what the task sees either way.
+     */
+    private function ownerWithNoTableTask(): UnusedSlideCleanupTask
+    {
+        return new class extends UnusedSlideCleanupTask {
+            protected function relations(): array
+            {
+                $broken = [];
+
+                foreach (parent::relations() as $relation) {
+                    $broken['notable.' . $relation['childField']] = array_merge($relation, [
+                        'parentClass' => UnbuiltCarouselOwnerStub::class,
+                    ]);
+                }
+
+                return $broken;
             }
         };
     }

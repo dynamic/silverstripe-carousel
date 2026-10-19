@@ -55,7 +55,8 @@ use Throwable;
  * - A half-read scan never writes. A carousel owner that cannot be inspected leaves its slides out
  *   of the reference set, so they look unused: --archive refuses to act on an incomplete set and
  *   exits non-zero. Listing is still safe, so a dry run only warns. A carousel join table that does
- *   not exist counts as half-read too, rather than as a relation with nothing in it.
+ *   not exist counts as half-read too, rather than as a relation with nothing in it - and so does
+ *   the stage table of an owner class.
  * - Archive, never delete. Versioned::doArchive() drops the row from draft and live and keeps a
  *   deleted version, so an archiving mistake is recoverable from the Archived stage (or
  *   through _Versions) rather than being data loss.
@@ -318,9 +319,10 @@ class UnusedSlideCleanupTask extends BuildTask
      * IDs of every row of this owner class that exists on any stage, as a set keyed by ID.
      *
      * A versioned owner counts on draft or on live: the join table cannot say which stage linked
-     * the row, so anything still listed by either stage is a live reference. Owners whose tables
-     * were never built (a TestOnly class outside the current suite, or a class awaiting
-     * /dev/build) contribute nothing instead of throwing.
+     * the row, so anything still listed by either stage is a live reference. An owner whose own
+     * stage table is missing (a renamed $table_name, a half-applied /dev/build) is a failed part of
+     * the scan rather than an owner with no rows, so it is recorded and --archive refuses; only a
+     * missing _Live table is read as simply having no live rows.
      *
      * The IDs come off the stage tables with raw SQL, the same way the join rows are read, and not
      * through the ORM. An `augmentSQL` extension on the owner class - Subsites limiting SiteTree
@@ -346,22 +348,32 @@ class UnusedSlideCleanupTask extends BuildTask
                 return [];
             }
 
+            // The owner's own table has to be there. Without it nothing about this owner is known,
+            // and an owner that is not read has its join rows discarded as stale - which is slides a
+            // real carousel is showing, archived. Recorded rather than returned empty.
+            if (!DB::get_schema()->hasTable($table)) {
+                $this->skipped[] = sprintf(
+                    'could not read owners of %s: the %s table does not exist',
+                    $class,
+                    $table
+                );
+
+                return [];
+            }
+
+            $ids = $this->mergeIDs($ids, $this->queryIDs($table));
+
             // Statically, not through singleton(): manyManyComponent() reports the class the
             // extension was applied to, and a project can apply it to an abstract base whose
             // concrete subclasses own all the rows. singleton() cannot build that base, and reading
             // an owner is supposed to be safe on the class name alone.
-            $stageTables = [$table];
-
             if (DataObject::has_extension($class, Versioned::class)) {
-                $stageTables[] = $table . '_Live';
-            }
+                $liveTable = $table . '_Live';
 
-            foreach ($stageTables as $stageTable) {
-                if (!DB::get_schema()->hasTable($stageTable)) {
-                    continue;
+                // A missing _Live table is not a half-read scan: no live table means no live rows.
+                if (DB::get_schema()->hasTable($liveTable)) {
+                    $ids = $this->mergeIDs($ids, $this->queryIDs($liveTable));
                 }
-
-                $ids = $this->mergeIDs($ids, $this->queryIDs($stageTable));
             }
 
             return $ids;
