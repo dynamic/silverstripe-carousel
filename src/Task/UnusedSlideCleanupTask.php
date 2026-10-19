@@ -536,9 +536,14 @@ class UnusedSlideCleanupTask extends BuildTask
     }
 
     /**
-     * Report classes this run could not read, and forget them so a later pass does not repeat the
-     * line. One unreadable class in a site's class manifest must not stop the scan, but it must not
-     * pass silently either: a skipped carousel owner means slides it holds look unused.
+     * Print the parts of this run's scan that failed and have not been printed yet.
+     *
+     * Nothing is forgotten here: $skipped keeps growing, because its emptiness is what
+     * scanIsIncomplete() reads to decide whether an archive pass may write at all. Clearing it to
+     * "reset" the warnings would silently re-enable archiving on a half-read reference set.
+     *
+     * One unreadable class in a site's class manifest must not stop the scan, but it must not pass
+     * silently either: a skipped carousel owner means slides it holds look unused.
      */
     protected function flushSkipped(PolyOutput $output): void
     {

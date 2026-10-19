@@ -115,9 +115,12 @@ sake tasks:carousel-unused-slide-cleanup
 sake tasks:carousel-unused-slide-cleanup --archive
 ```
 
-Archiving, not deleting: an archived Slide keeps a version, so a mistaken run can be restored from
-the Archived stage. The task refuses to archive anything if a carousel owner could not be read,
-since that owner's slides would then look unused; it warns and exits non-zero instead.
+Archiving, not deleting: `doArchive()` drops the row from draft and live but keeps its version
+history, so a mistaken run is not data loss - the slide comes back with
+`Versioned::get_latest_version(Slide::class, $id)->writeToStage(Versioned::DRAFT)`. Slide has no CMS
+screen of its own, so that restore is code rather than a button. The task refuses to archive anything
+if a carousel owner could not be read, since that owner's slides would then look unused; it warns and
+exits non-zero instead.
 
 ## Customization
 

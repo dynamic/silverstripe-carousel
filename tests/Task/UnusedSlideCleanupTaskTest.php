@@ -558,7 +558,7 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
             $buffer
         );
 
-        $method = new \ReflectionMethod(UnusedSlideCleanupTask::class, 'execute');
+        $method = new ReflectionMethod(UnusedSlideCleanupTask::class, 'execute');
         $code = $method->invoke($task, $input, $output);
 
         return [$code, $buffer->fetch()];
