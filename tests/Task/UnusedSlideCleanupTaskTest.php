@@ -6,9 +6,11 @@ use Dynamic\Carousel\Extension\CarouselPageExtension;
 use Dynamic\Carousel\Model\ImageSlide;
 use Dynamic\Carousel\Model\Slide;
 use Dynamic\Carousel\Task\UnusedSlideCleanupTask;
+use Dynamic\Carousel\Test\Stubs\HiddenOwnerReadStubExtension;
 use Dynamic\Carousel\Test\Test\Model\TestCarousel;
 use ReflectionMethod;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\ORM\DB;
 use SilverStripe\PolyExecution\PolyOutput;
 use SilverStripe\Versioned\Versioned;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -32,6 +34,7 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
     protected static $required_extensions = [
         TestCarousel::class => [
             CarouselPageExtension::class,
+            HiddenOwnerReadStubExtension::class,
         ],
     ];
 
@@ -203,6 +206,150 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
     }
 
     /**
+     * The mirror of the draft-only case above: the carousel's draft row is gone and its published
+     * row is what still lists the slide. Nothing on draft would miss that slide, so an owner check
+     * that only read the draft table would archive a slide a live carousel is still showing. This
+     * is the test that fails if the live half of ownerIDsOnAnyStage() is dropped.
+     */
+    public function testSlideOnALiveOnlyCarouselIsNeverTouched(): void
+    {
+        $slide = $this->createSlide('Slide a published-only carousel lists');
+        $carousel = $this->createCarousel('Carousel with its draft row deleted', [$slide], true);
+        $carousel->deleteFromStage(Versioned::DRAFT);
+
+        $this->assertNull(
+            Versioned::get_by_stage(TestCarousel::class, Versioned::DRAFT)->byID($carousel->ID),
+            'Setup: the carousel must be off draft'
+        );
+        $this->assertNotNull(
+            Versioned::get_by_stage(TestCarousel::class, Versioned::LIVE)->byID($carousel->ID),
+            'Setup: the carousel must still be on live'
+        );
+
+        [$code, $output] = $this->runTask(true);
+
+        $this->assertSame(0, $code);
+        $this->assertSame([], $this->listedSlideIDs($output));
+        $this->assertStringContainsString('Archived 0 unused slides.', $output);
+        $this->assertSlideOnBothStages($slide->ID);
+    }
+
+    /**
+     * The owner check has to see every row of the owner's stage tables, not merely the rows the ORM
+     * hands back. An `augmentSQL` filter on the owner class - Subsites restricting SiteTree to the
+     * current subsite is the real one - hides a carousel from `Versioned::get_by_stage()` while
+     * leaving it in the table, and a carousel that is not read has its join rows discarded as stale,
+     * so `--archive` removes slides a published carousel still shows. Reading the tables directly is
+     * what makes an extension on a project's own owner class unable to widen this task's blast radius.
+     */
+    public function testOwnerHiddenFromTheORMByAnAugmentSQLFilterStillCountsAsAReference(): void
+    {
+        $slide = $this->createSlide('Slide on a carousel the ORM cannot read');
+        $carousel = $this->createCarousel('Carousel hidden by an augmentSQL filter', [$slide], true);
+
+        $this->assertNotNull(
+            Versioned::get_by_stage(TestCarousel::class, Versioned::DRAFT)->byID($carousel->ID),
+            'Setup: the carousel is readable before the filter goes on'
+        );
+
+        // The row stays in the stage table; no ORM read of the class returns it any more.
+        HiddenOwnerReadStubExtension::$hiddenIDs = [$carousel->ID];
+
+        try {
+            $this->assertNull(
+                Versioned::get_by_stage(TestCarousel::class, Versioned::DRAFT)->byID($carousel->ID),
+                'Setup: the ORM must not be able to read the carousel the filter hides'
+            );
+            $this->assertNull(
+                Versioned::get_by_stage(TestCarousel::class, Versioned::LIVE)->byID($carousel->ID),
+                'Setup: the filter hides both stages, the way Subsites hides a page'
+            );
+            $this->assertContains(
+                $carousel->ID,
+                array_map('intval', DB::query('SELECT "ID" FROM "Carousel_TestCarousel"')->column('ID')),
+                'Setup: the carousel row is still in the stage table the task reads'
+            );
+
+            [$dryCode, $dryOutput] = $this->runTask(false);
+
+            $this->assertSame(0, $dryCode);
+            $this->assertSame(
+                [],
+                $this->listedSlideIDs($dryOutput),
+                'A carousel the ORM hides is still a carousel, so its slide is not unused'
+            );
+
+            [$code, $output] = $this->runTask(true);
+
+            $this->assertSame(0, $code);
+            $this->assertStringContainsString('Archived 0 unused slides.', $output);
+            $this->assertSlideOnBothStages($slide->ID);
+        } finally {
+            HiddenOwnerReadStubExtension::$hiddenIDs = [];
+        }
+    }
+
+    /**
+     * The per-row owner check, on its own rather than through the "no owner at all" shortcut: one
+     * join table holding rows for both an archived carousel and a live one. Only the archived
+     * carousel's rows are stale, and the other carousel's slide has to stay - which is what a
+     * per-row test that only ever exercises the empty-owner early exit cannot show.
+     */
+    public function testStaleRowsAndLiveRowsInTheSameJoinTableAreToldApart(): void
+    {
+        $abandoned = $this->createSlide('Slide of the archived carousel');
+        $kept = $this->createSlide('Slide of the live carousel');
+        $neverLinked = $this->createSlide('Slide no carousel ever listed');
+
+        $doomed = $this->createCarousel('Carousel archived after the fact', [$abandoned], true);
+        $this->createCarousel('Carousel still live', [$kept], true);
+        $doomed->doArchive();
+        $neverLinked->publishSingle();
+
+        [$dryCode, $dryOutput] = $this->runTask(false);
+
+        $this->assertSame(0, $dryCode);
+        $this->assertSame([$abandoned->ID, $neverLinked->ID], $this->listedSlideIDs($dryOutput));
+        $this->assertStringNotContainsString($kept->Title, $dryOutput);
+
+        [$code, $output] = $this->runTask(true);
+
+        $this->assertSame(0, $code);
+        $this->assertStringContainsString('Archived 2 unused slides.', $output);
+        $this->assertSlideGoneFromBothStages($abandoned->ID);
+        $this->assertSlideGoneFromBothStages($neverLinked->ID);
+        $this->assertSlideOnBothStages($kept->ID);
+    }
+
+    /**
+     * A carousel join table that is not there is a part of the scan that failed, not a relation with
+     * nothing to report: every slide it used to link would look unused. So it warns on a dry run and
+     * an archive pass refuses - fail closed. A `many_many` redefined with a `through` class reports
+     * that class name where a table name is expected, which is how a site reaches this.
+     */
+    public function testMissingJoinTableIsReportedAndStopsAnArchivePass(): void
+    {
+        $slide = $this->createSlide('Slide behind a join table that cannot be read');
+        $this->createCarousel('Carousel whose join table is missing', [$slide], true);
+
+        [$dryCode, $dryOutput] = $this->runTask(false, $this->missingJoinTableTask());
+
+        $this->assertSame(0, $dryCode);
+        $this->assertStringContainsString(
+            'WARNING: could not read the Carousel_NoSuchJoinTable carousel join table',
+            $dryOutput
+        );
+        $this->assertStringNotContainsString('Refusing to archive', $dryOutput);
+
+        [$code, $output] = $this->runTask(true, $this->missingJoinTableTask());
+
+        $this->assertSame(1, $code);
+        $this->assertStringContainsString('Refusing to archive', $output);
+        $this->assertStringNotContainsString('Archived', $output);
+        $this->assertSlideOnBothStages($slide->ID, 'An unreadable join table must not cost a slide its row');
+    }
+
+    /**
      * A site that has the module but no carousel owner configured yet is a scan with nothing to
      * scan: it says so, archives nothing, and does not fail.
      */
@@ -317,6 +464,28 @@ class UnusedSlideCleanupTaskTest extends SapphireTest
                 $this->skipped[] = sprintf('could not read owners of %s: simulated', $class);
 
                 return [];
+            }
+        };
+    }
+
+    /**
+     * A relation whose join table does not exist, which is what a `many_many` with a `through` class
+     * looks like from this side: manyManyComponent() hands back the through class's name there.
+     */
+    private function missingJoinTableTask(): UnusedSlideCleanupTask
+    {
+        return new class extends UnusedSlideCleanupTask {
+            protected function relations(): array
+            {
+                $broken = [];
+
+                foreach (parent::relations() as $relation) {
+                    $broken['missing.' . $relation['childField']] = array_merge($relation, [
+                        'join' => 'Carousel_NoSuchJoinTable',
+                    ]);
+                }
+
+                return $broken;
             }
         };
     }

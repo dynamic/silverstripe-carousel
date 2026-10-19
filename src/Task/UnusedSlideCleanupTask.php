@@ -42,13 +42,20 @@ use Throwable;
  *   owner's stage table. Owners that are not versioned have one set of rows; versioned owners
  *   count on either stage, because the join table itself is not versioned and cannot tell the two
  *   apart - a slide a draft-only carousel still lists is not safe to archive either.
+ * - Both halves of that check are raw SQL, and deliberately so. An ORM read of the owner table goes
+ *   through augmentSQL, so an extension on a project's own carousel owner - Subsites scoping
+ *   SiteTree to the current subsite, for one - can drop a carousel out of the read while it sits
+ *   untouched in the table. An owner that drops out has its join rows discarded as stale, and the
+ *   slides a published carousel is showing get archived. Reading the stage tables directly is the
+ *   one thing an extension cannot filter.
  *
  * Safety:
  *
  * - Dry run by default. Without --archive this task only reads, and says so.
  * - A half-read scan never writes. A carousel owner that cannot be inspected leaves its slides out
  *   of the reference set, so they look unused: --archive refuses to act on an incomplete set and
- *   exits non-zero. Listing is still safe, so a dry run only warns.
+ *   exits non-zero. Listing is still safe, so a dry run only warns. A carousel join table that does
+ *   not exist counts as half-read too, rather than as a relation with nothing in it.
  * - Archive, never delete. Versioned::doArchive() drops the row from draft and live and keeps a
  *   deleted version, so an archiving mistake is recoverable from the Archived stage (or
  *   through _Versions) rather than being data loss.
@@ -215,7 +222,11 @@ class UnusedSlideCleanupTask extends BuildTask
                     continue;
                 }
 
-                if (!DataObject::singleton($class)->hasExtension(CarouselPageExtension::class)) {
+                // Statically, for the same reason ownerIDsOnAnyStage() reads Versioned statically:
+                // building a singleton of every DataObject class in the manifest means one unrelated
+                // class whose constructor throws is reported as an unreadable carousel owner, which
+                // stops an archive pass on a site where the scan is in fact complete.
+                if (!DataObject::has_extension($class, CarouselPageExtension::class)) {
                     continue;
                 }
 
@@ -265,6 +276,15 @@ class UnusedSlideCleanupTask extends BuildTask
 
         foreach ($relations as $relation) {
             if (!DB::get_schema()->hasTable($relation['join'])) {
+                // Not a silent skip: an unreadable join table means every slide it linked looks
+                // unused, which is the one thing an archive pass must not act on. A many_many
+                // redefined as one with a `through` class is the realistic way to get here -
+                // manyManyComponent() reports that class name as 'join', and it is not a table.
+                $this->skipped[] = sprintf(
+                    'could not read the %s carousel join table: it does not exist',
+                    $relation['join']
+                );
+
                 continue;
             }
 
@@ -302,6 +322,14 @@ class UnusedSlideCleanupTask extends BuildTask
      * were never built (a TestOnly class outside the current suite, or a class awaiting
      * /dev/build) contribute nothing instead of throwing.
      *
+     * The IDs come off the stage tables with raw SQL, the same way the join rows are read, and not
+     * through the ORM. An `augmentSQL` extension on the owner class - Subsites limiting SiteTree
+     * reads to the current subsite is the case that matters - would narrow an ORM read, and a
+     * carousel that simply dropped out of $ids has its join rows thrown away as stale, so its
+     * slides get archived while a published carousel still shows them. Reading every row of the
+     * stage table cannot miss an owner, and over-counting is the safe direction anyway: more
+     * references means fewer slides archived.
+     *
      * @param string $class
      * @return array<int,true>
      */
@@ -312,32 +340,28 @@ class UnusedSlideCleanupTask extends BuildTask
         try {
             $table = DataObject::getSchema()->baseDataTable($class);
 
+            if (!is_string($table) || $table === '') {
+                $this->skipped[] = sprintf('could not read owners of %s: it has no base data table', $class);
+
+                return [];
+            }
+
             // Statically, not through singleton(): manyManyComponent() reports the class the
             // extension was applied to, and a project can apply it to an abstract base whose
             // concrete subclasses own all the rows. singleton() cannot build that base, and reading
             // an owner is supposed to be safe on the class name alone.
+            $stageTables = [$table];
+
             if (DataObject::has_extension($class, Versioned::class)) {
-                $stages = [Versioned::DRAFT => $table, Versioned::LIVE => $table . '_Live'];
+                $stageTables[] = $table . '_Live';
+            }
 
-                foreach ($stages as $stage => $stageTable) {
-                    if (!DB::get_schema()->hasTable($stageTable)) {
-                        continue;
-                    }
-
-                    foreach (Versioned::get_by_stage($class, $stage)->column('ID') as $id) {
-                        $ids[(int) $id] = true;
-                    }
+            foreach ($stageTables as $stageTable) {
+                if (!DB::get_schema()->hasTable($stageTable)) {
+                    continue;
                 }
 
-                return $ids;
-            }
-
-            if (!DB::get_schema()->hasTable($table)) {
-                return [];
-            }
-
-            foreach (DataObject::get($class)->column('ID') as $id) {
-                $ids[(int) $id] = true;
+                $ids = $this->mergeIDs($ids, $this->queryIDs($stageTable));
             }
 
             return $ids;
@@ -346,6 +370,41 @@ class UnusedSlideCleanupTask extends BuildTask
 
             return [];
         }
+    }
+
+    /**
+     * Every ID in one stage table of one owner class, read without the ORM so no extension can
+     * filter an owner out of the set.
+     *
+     * @param string $table
+     * @return array<int,true>
+     */
+    protected function queryIDs(string $table): array
+    {
+        $result = DB::query(sprintf('SELECT "ID" FROM "%s"', $table));
+        $ids = [];
+
+        foreach ($result->column('ID') as $id) {
+            $ids[(int) $id] = true;
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Union of two ID sets, keyed by ID.
+     *
+     * @param array<int,true> $ids
+     * @param array<int,true> $more
+     * @return array<int,true>
+     */
+    protected function mergeIDs(array $ids, array $more): array
+    {
+        foreach ($more as $id => $present) {
+            $ids[$id] = true;
+        }
+
+        return $ids;
     }
 
     /**
