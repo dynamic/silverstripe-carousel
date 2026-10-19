@@ -17,6 +17,8 @@ A versatile carousel module for Silverstripe websites, featuring support for ima
 - [Usage](#usage)
   - [Adding a Carousel to a Page](#adding-a-carousel-to-a-page)
   - [Working with Images and Videos](#working-with-images-and-videos)
+- [Maintenance tasks](#maintenance-tasks)
+  - [Removing slides no carousel uses](#removing-slides-no-carousel-uses)
 - [Customization](#customization)
   - [Creating Custom Templates](#creating-custom-templates)
 - [Other Modules Using Silverstripe Carousel](#other-modules-using-silverstripe-carousel)
@@ -96,6 +98,29 @@ To add these:
    - Optionally, add a caption.
 
 Repeat these steps to add multiple images or videos as needed.
+
+## Maintenance tasks
+
+### Removing slides no carousel uses
+
+Because a Slide can be in more than one carousel, removing a carousel never removes its slides (see
+[issue #55](https://github.com/dynamic/silverstripe-carousel/issues/55)), so slides that no carousel
+lists any more stay in the database, and there is no CMS screen for them. This task finds them:
+
+```sh
+# List them (dry run, the default - changes nothing)
+sake tasks:carousel-unused-slide-cleanup
+
+# Archive them, on draft and live
+sake tasks:carousel-unused-slide-cleanup --archive
+```
+
+Archiving, not deleting: `doArchive()` drops the row from draft and live but keeps its version
+history, so a mistaken run is not data loss - the slide comes back with
+`Versioned::get_latest_version(Slide::class, $id)->writeToStage(Versioned::DRAFT)`. Slide has no CMS
+screen of its own, so that restore is code rather than a button. The task refuses to archive anything
+if a carousel owner could not be read, since that owner's slides would then look unused; it warns and
+exits non-zero instead.
 
 ## Customization
 
